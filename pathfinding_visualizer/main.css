@@ -1,0 +1,173 @@
+body { 
+    padding-top: 80px; 
+	height: 100%;
+	background-image:url("https://thumbs-prod.si-cdn.com/EXZEKoICe9HcGSg6UzK7g7s8dbw=/fit-in/1600x0/https://public-media.si-cdn.com/filer/3c/2a/3c2af135-c333-4262-a5d9-91d596494c1e/mars_surface.jpg");
+}
+
+td {
+    border: 1px solid #fcf8f8;
+    width: 20px;
+	height: 20px;
+	box-shadow: rgba(245, 245, 245, 0.603);
+}
+
+.key {
+	border: 1px solid rgb(107, 106, 106);
+	background-color: rgb(102, 101, 101);
+	width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+ul {
+	list-style-type: none;
+}
+
+.btn-space {
+	margin-right: 5px;
+	margin-left: 5px;
+}
+
+#update {
+	margin-bottom: 15px; 
+	margin-top: 10px;
+}
+table{
+	border: 2px solid #f4f4f4;
+	
+}
+.wall {
+	transition : background-color 0.1s ease-in-out;
+	background-color: hsl(0, 0%, 6%);
+	border-color: hsl(0, 0%, 6%);
+}
+
+.none {
+	transition : background-color 0.1s ease-in-out;
+	background-color: rgb(114, 108, 108);
+	border-color:rgb(146, 142, 142);
+}
+
+.searching {
+	transition : background-color 0.08s ease-in-out;
+	background-color: #65c5b5;
+	border-color: #1cd4b5;
+}
+
+.visited {
+	transition : background-color 0.08s ease-in-out;
+	background-color: #e89440;
+	border-color: #e89440;
+}
+
+.success {
+	transition : background-color 0.08s ease-in-out;
+	background-color: #ffee31;
+	border-color: #ffee31;
+}
+
+.start {
+	background-color: #096911a1;
+	border-color: #09691b;
+}
+
+.end {
+	background-color: #e70b03b4;
+	border-color:#e70b0b;
+}
+
+#bigTableContainer {
+	margin-top: 30px;
+	background-color: rgb(173, 35, 132);
+}
+
+.custom-section {
+	margin-bottom: 20px;
+}
+
+#modalTitleContainer {
+	padding-top: 10px;
+}
+
+#results {
+	height: 87px;
+	width: 120px;
+	background-color: #ffc107;
+	position: fixed;
+	right: 10px;
+	bottom: 10px;
+	color: black;
+	font-size: 12px;
+	text-align: center;
+	border: 1px dashed black;
+}
+
+#resultsIcon {
+	margin-bottom: 3px;
+	margin-top: 7px;
+	font-size: 16px;
+}
+
+#duration, #length {
+	padding: 3px;
+}
+
+#infoModalBtn {
+	margin-left: 20px;
+}
+
+.fun-fact {
+	color: darkgreen;
+}
+.introjs-helperLayer {
+    box-sizing: content-box;
+    position: absolute;
+    z-index: 9999998;
+    background-color: #fff;
+    background-color: #ced4da00;
+    border: 2px solid #f4f4f4;
+    border: 2px solid #f4f4f4;
+    border-radius: 4px;
+    box-shadow: 0 2px 15px #f4f4f4;
+    -webkit-transition: all .3s ease-out;
+    -moz-transition: all .3s ease-out;
+    -ms-transition: all .3s ease-out;
+    -o-transition: all .3s ease-out;
+    transition: all .3s ease-out;
+}
+
+
+.introjs-helperNumberLayer {
+    box-sizing: content-box;
+    position: absolute;
+    visibility: visible;
+    top: -16px;
+    left: -16px;
+    z-index: 9999999999 !important;
+    padding: 2px;
+    font-family: Arial, verdana, tahoma;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    text-shadow: 1px 1px 1px rgba(0,0,0,.3);
+    /* background: #ff3019; */
+    /* background: -webkit-linear-gradient(top, #ff3019 0%, #cf0404 100%); */
+    /* background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ff3019), color-stop(100%, #cf0404)); */
+    background: -moz-linear-gradient(top, #ff3019 0%, #cf0404 100%);
+    background: -ms-linear-gradient(top, #ff3019 0%, #cf0404 100%);
+    background: -o-linear-gradient(top, #ff3019 0%, #cf0404 100%);
+    background: linear-gradient(to bottom, #f8f418 0%, #d43505 100%);
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    border: none;
+    border-radius: 50%;
+    filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff3019', endColorstr='#cf0404', GradientType=0)";
+    filter: "progid:DXImageTransform.Microsoft.Shadow(direction=135, strength=2, color=ff0000)";
+    box-shadow: 0 2px 5px rgba(0,0,0,.4);
+}
+.introjs-tooltip {
+    background-color: #2125296e;
+    color: #f4f4f4;
+}
