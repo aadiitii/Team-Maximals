@@ -11,6 +11,7 @@ var endCell = [11, 25];
 var cellsToAnimate = [];
 var movingStart = false;
 var movingEnd = false;
+var allowDiagonal = false;
 
 function generateGrid( rows, cols ) {
     var grid = "<table>";
@@ -191,6 +192,8 @@ function updateStartBtnText(){
 		$("#startBtn").html("Start DFS");
 	} else if (algorithm == "Breadth-First Search (BFS)"){
 		$("#startBtn").html("Start BFS");
+	} else if (algorithm == "Bidirectional BFS"){
+		$("#startBtn").html("Start Bidirectional BFS");
 	} else if (algorithm == "Dijkstra"){
 		$("#startBtn").html("Start Dijkstra");
 	} else if (algorithm == "A*"){
@@ -265,12 +268,15 @@ async function traverseGraph(algorithm){
 	justFinished = true;
 }
 
+// to  execute the algorithm
 function executeAlgo(){
 	if (algorithm == "Depth-First Search (DFS)"){
 		var visited = createVisited();
 		var pathFound = DFS(startCell[0], startCell[1], visited);
 	} else if (algorithm == "Breadth-First Search (BFS)"){
 		var pathFound = BFS();
+	} else if (algorithm == "Bidirectional BFS"){
+		var pathFound = biBFS();
 	} else if (algorithm == "Dijkstra"){
 		var pathFound = dijkstra();
     }
@@ -283,31 +289,28 @@ function executeAlgo(){
 	}
 	return pathFound;
 }
+
+// to keep track of visited nodes
 function createVisited(){
 	var visited = [];
     var cells = $("#tableContainer").find("td");
    
 	for (var i = 0; i < totalRows; i++){
 		var row = [];
-		for (var j = 0; j < totalCols; j++){
-			if (cellIsAWall(i, j, cells)){
-               
-                row.push(true);
-               
-            } else 
-            {   
-				row.push(false);
+		for (var j = 0; j < totalCols; j++){  
+				row.push(null);        
 			}
-		}
 		visited.push(row);
     }
     
 	return visited;
 }
+
 function cellIsAWall(i, j, cells){
 	var cellNum = (i * (totalCols)) + j;
 	return $(cells[cellNum]).hasClass("wall");
 }
+
 function createPrev(){
 	var prev = [];
 	for (var i = 0; i < totalRows; i++){
@@ -320,12 +323,29 @@ function createPrev(){
 	return prev;
 }
 
-function getNeighbours(i, j){
+//taking neighbours only when not a wall
+function getNeighbours(i, j,allowDiagonal){
 	var neighbours = [];
-	if ( i > 0 ){ neighbours.push( [i - 1, j] );}
-	if ( j > 0 ){ neighbours.push( [i, j - 1] );}
-	if ( i < (totalRows - 1) ){ neighbours.push( [i + 1, j] );}
-	if ( j < (totalCols - 1) ){ neighbours.push( [i, j + 1] );}
+	var cells = $("#tableContainer").find("td");
+
+	if(allowDiagonal){
+		if ( i > 0 ){ neighbours.push( [i - 1, j] );} //top
+		if( i > 0 && j < (totalCols - 1) ){neighbours.push( [i - 1, j+1] );} //top-right
+		if ( j < (totalCols - 1) ){ neighbours.push( [i, j + 1] );} //right
+	    if(i < (totalRows - 1) && j < (totalCols - 1) ){ neighbours.push( [i + 1, j + 1] );} //bottom-right
+		if ( i < (totalRows - 1) ){ neighbours.push( [i + 1, j] );} //bottom
+		if(i < (totalRows - 1) && j > 0){ neighbours.push( [i + 1, j - 1] );} // bottom-left
+		if ( j > 0 ){ neighbours.push( [i, j - 1] );} //left
+		if(i > 0 && j > 0){ neighbours.push( [i - 1, j - 1] );} // top-left
+	}else{
+		if ( i > 0 && !cellIsAWall(i-1,j,cells) ){ neighbours.push( [i - 1, j] );} //top
+		if ( j < (totalCols - 1)   && !cellIsAWall(i,j+1,cells)){ neighbours.push( [i, j + 1] );} //right
+		if ( i < (totalRows - 1)   && !cellIsAWall(i+1,j,cells)){ neighbours.push( [i + 1, j] );} //bottom
+		if ( j > 0  && !cellIsAWall(i,j-1,cells) ){ neighbours.push( [i, j - 1] );} //left
+
+		
+	}
+	
 	return neighbours;
 }
 function createDistances(){
@@ -339,6 +359,8 @@ function createDistances(){
 	}
 	return distances;
 }
+
+//algo1 = Breadth First Search
 function BFS(){
 	var pathFound = false;
 	var myQueue = new Array();
@@ -390,67 +412,127 @@ function BFS(){
 	return pathFound;
 }
 
-// function dijkstra() {
-// 	var pathFound = false;
-// 	var myHeap = [];
-// 	var prev = createPrev();
-// 	var distances = createDistances();
-// 	var visited = createVisited();
-// 	distances[ startCell[0] ][ startCell[1] ] = 0;
-// 	myHeap.push([0, [startCell[0], startCell[1]]]);
-// 	cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
-// 	while (myHeap.length > 0){
-// 		var cell = myHeap.dequeue();
-// 		//console.log("Min was just popped from the heap! Heap is now: " + JSON.stringify(myHeap.heap));
-// 		var i = cell[1][0];
-// 		var j = cell[1][1];
-// 		if (visited[i][j]){ continue; }
-// 		visited[i][j] = true;
-// 		cellsToAnimate.push([[i, j], "visited"]);
-// 		if (i == endCell[0] && j == endCell[1]){
-// 			pathFound = true;
-// 			break;
-// 		}
-// 		var neighbors = getNeighbors(i, j);
-// 		for (var k = 0; k < neighbors.length; k++){
-// 			var m = neighbors[k][0];
-// 			var n = neighbors[k][1];
-// 			if (visited[m][n]){ continue; }
-// 			var newDistance = distances[i][j] + 1;
-// 			if (newDistance < distances[m][n]){
-// 				distances[m][n] = newDistance;
-// 				prev[m][n] = [i, j];
-// 				myHeap.push([newDistance, [m, n]]);
-// 				//console.log("New cell was added to the heap! It has distance = " + newDistance + ". Heap = " + JSON.stringify(myHeap.heap));
-// 				cellsToAnimate.push( [[m, n], "searching"] );
-// 			}
-// 		}
-// 		//console.log("Cell [" + i + ", " + j + "] was just evaluated! myHeap is now: " + JSON.stringify(myHeap.heap));
-// 	}
-// 	//console.log(JSON.stringify(myHeap.heap));
-// 	// Make any nodes still in the heap "visited"
-// 	while ( !myHeap.isEmpty() ){
-// 		var cell = myHeap.getMin();
-// 		var i = cell[1][0];
-// 		var j = cell[1][1];
-// 		if (visited[i][j]){ continue; }
-// 		visited[i][j] = true;
-// 		cellsToAnimate.push( [[i, j], "visited"] );
-// 	}
-// 	// If a path was found, illuminate it
-// 	if (pathFound) {
-// 		var i = endCell[0];
-// 		var j = endCell[1];
-// 		cellsToAnimate.push( [endCell, "success"] );
-// 		while (prev[i][j] != null){
-// 			var prevCell = prev[i][j];
-// 			i = prevCell[0];
-// 			j = prevCell[1];
-// 			cellsToAnimate.push( [[i, j], "success"] );
-// 		}
-// 	}
-// 	return pathFound;
-// }
+
+//Algo2 = Bidirectional BFS
+function biBFS(){
+    var pathFound = false;
+    var s_queue = new Array();  // queue for search
+    var t_queue = new Array();
+ 
+    var s_prev = createPrev(); //for parent
+    var t_prev = createPrev();
+
+    var visited = createVisited(); // to keep track of visited nodes
+   
+    var intersecting_node = -1; // initialising 
+ 
+    s_queue.unshift( startCell ); // begin from start and end
+    t_queue.unshift( endCell ); 
+    cellsToAnimate.push(startCell, "searching");  // animation
+    cellsToAnimate.push(endCell, "searching");
+ 
+    visited[ startCell[0] ][ startCell[1] ] = 's'; //visited made true if from start
+    visited[ endCell[0] ][ endCell[1] ] = 't'; // when from target node
+    var intersecting_node =-1;
+    while ( s_queue.length > 0 && t_queue.length > 0 ){
+        var s_cell = s_queue.pop();
+        var t_cell = t_queue.pop();
+        var s_r = s_cell[0];
+        var t_r = t_cell[0];
+        var s_c = s_cell[1];
+        var t_c = t_cell[1];
+        cellsToAnimate.push( [s_cell, "visited"] ); //animation
+		cellsToAnimate.push( [t_cell, "visited"] );
+		
+            // Put neighboring cells in queue
+            var s_neighbours = getNeighbours(s_r,s_c,allowDiagonal);
+            var t_neighbours = getNeighbours(t_r,t_c,allowDiagonal);
+			
+			// neighbours for end or target node
+            for (var p = 0; p < t_neighbours.length ; p++){
+	
+				var m2 = t_neighbours[p][0];
+				var n2 = t_neighbours[p][1];
+				if (visited[m2][n2] === 't' ) {
+					console.log("continue for t");
+					 continue ;
+				   }else
+				if(visited[m2][n2] === null){ 
+					   visited[m2][n2] = 't'; // updating if null before
+					   t_prev[m2][n2] = [t_r, t_c];
+					   console.log("parent of [" + m2 + n2 + "] is" + t_r + t_c); 
+					   cellsToAnimate.push( [t_neighbours[p], "searching"] );
+					   t_queue.unshift(t_neighbours[p]);
+				}else{
+					 intersecting_node = [m2,n2]; // if present and not from t then it is intersecting
+					 t_prev[m2][n2] = [t_r, t_c];
+					 console.log("t_prev of IN"+t_prev[intersecting_node[0]][intersecting_node[1]]);
+					 break;
+
+				  }
+			   
+			   }
+            // neighbours of start node
+             for (var k = 0; k < s_neighbours.length ; k++){
+                 var m1 = s_neighbours[k][0];
+                 var n1 = s_neighbours[k][1];
+                 if (visited[m1][n1] === 's') {
+					console.log("continue for s"); 
+                     continue;
+                    }else
+                 if(visited[m1][n1] === null){
+                        visited[m1][n1] = 's'; // updating if null before
+                        s_prev[m1][n1] = [s_r, s_c];
+                        console.log("parent of [" + m1 + n1 + "] is" + s_r + s_c); 
+                        cellsToAnimate.push( [s_neighbours[k], "searching"] );
+                        s_queue.unshift(s_neighbours[k]);
+					}else{
+					 intersecting_node = [m1,n1]; // if present and not from s then intersecting
+					 s_prev[m1][n1] = [s_r, s_c];
+					 console.log("s_prev of IN"+s_prev[intersecting_node[0]][intersecting_node[1]]);
+					}
+             }
+			
+			// if intersection found 
+            if(intersecting_node !== -1){
+                pathFound =true;
+                console.log("intersecting node "+intersecting_node);
+
+ 
+ 
+              var r = intersecting_node[0];
+              var c = intersecting_node[1];
+             cellsToAnimate.push( [[r, c], "success"] );
+             while (s_prev[r][c] != null){ // path from start
+                 var prevCell = s_prev[r][c];
+                 r = prevCell[0];
+                 c = prevCell[1];
+      
+                 cellsToAnimate.push( [[r, c], "success"] );
+             }
+			      r = intersecting_node[0];
+                  c = intersecting_node[1];
+			 cellsToAnimate.push( [[r, c], "success"] );
+			 if(t_prev[r][c]===null){
+				 console.log("t_prev for intersecting node is null");
+			 }
+             while (t_prev[r][c] != null){ // path for target 
+                 console.log("t_prev console" + t_prev[r][c]);
+                 var prevCell = t_prev[r][c];
+                 r = prevCell[0];
+                 c = prevCell[1];
+      
+                 cellsToAnimate.push( [[r, c], "success"] );
+             }
+ 
+                break;
+            }
+            
+        }
+         return pathFound;
+     }
+
+	 //animation 
 async function animateCells(){
 	animationState = null;
 	var cells = $("#tableContainer").find("td");
@@ -476,6 +558,8 @@ async function animateCells(){
 	//console.log("End of animation has been reached!");
 	return new Promise(resolve => resolve(true));
 }
+
+// get delay in animation
 function getDelay(){
 	var delay;
 	if (animationSpeed === "Slow"){
