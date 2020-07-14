@@ -13,7 +13,7 @@ var movingStart = false;
 var movingEnd = false;
 var allowDiagonal=false;
 var bidirectional=true;   // implement a func to set this variable true when that option is clicked
-var type ="manhattan"; //create a func to set the type according to the selected option
+var type ="chebyshev"; //create a func to set the type according to the selected option
 var weight =1;  // update this value according to the weight entered by the user
 
 function generateGrid( rows, cols ) {
@@ -280,6 +280,8 @@ function updateStartBtnText(){
 		$("#startBtn").html("Start BiA*");
 	}else if (algorithm == "Greedy Best-First Search"){
 		$("#startBtn").html("Start Greedy BFS");
+	}else if (algorithm == "Bi-Greedy Best-First Search"){
+		$("#startBtn").html("Start Bi-Greedy BFS");
 	} else if (algorithm == "Bidirectional BFS"){
 		$("#startBtn").html("Start Bi BFS");
 	} else if (algorithm == "Jump Point Search"){
@@ -371,6 +373,8 @@ function executeAlgo(){
 		var pathFound = BiAStar();
 	} else if (algorithm == "Greedy Best-First Search"){
 		var pathFound = greedyBestFirstSearch();
+	}else if (algorithm == "Bi-Greedy Best-First Search"){
+		var pathFound = BigreedyBestFirstSearch();
 	} else if (algorithm == "Bidirectional BFS"){
 		var pathFound = biBFS();
 	} else if (algorithm == "Jump Point Search"){
@@ -493,7 +497,7 @@ function BFS(){
 	var pathFound = false;
 	var myQueue = new Array();
 	var prev = createPrev();
-	var visited = createVisited();
+	var visited = actualVisited();
 	//var arrstorewall = storewalls();
 	myQueue.unshift( startCell );
 	cellsToAnimate.push(startCell, "searching");
@@ -1141,6 +1145,207 @@ function Bidijkstra(){
     
 	return pathFound;
 }
+
+function greedyBestFirstSearch() {
+	var pathFound = false;
+	var myHeap = new minHeap();
+	var prev = createPrev();
+	var costs = createDistances();
+	var visited = actualVisited();
+	costs[ startCell[0] ][ startCell[1] ] = 0;
+	myHeap.push([0, [startCell[0], startCell[1]]]);
+	cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
+	while (!myHeap.isEmpty()){
+		var cell = myHeap.getMin();
+		var i = cell[1][0];
+		var j = cell[1][1];
+		if (visited[i][j]){ continue; }
+		visited[i][j] = true;
+		cellsToAnimate.push([[i, j], "visited"]);
+		if (i == endCell[0] && j == endCell[1]){
+			pathFound = true;
+			break;
+		}
+		var neighbours = getNeighbours(i, j);
+		for (var k = 0; k < neighbours.length; k++){
+			var m = neighbours[k][0];
+			var n = neighbours[k][1];
+			if (visited[m][n]){ continue; }
+			var newCost = ((Math.abs(endCell[0] - m) + Math.abs(endCell[1] - n))+ (weight *heuristics(type,m,n,'s')));
+			if (newCost < costs[m][n]){
+				prev[m][n] = [i, j];
+				costs[m][n] = newCost;
+				myHeap.push([newCost, [m, n]]);
+				cellsToAnimate.push([[m, n], "searching"]);
+			}
+		}
+	}
+
+	// If a path was found, illuminate it
+	if (pathFound) {
+		var i = endCell[0];
+		var j = endCell[1];
+		cellsToAnimate.push( [endCell, "success"] );
+		while (prev[i][j] != null){
+			var prevCell = prev[i][j];
+			i = prevCell[0];
+			j = prevCell[1];
+			cellsToAnimate.push( [[i, j], "success"] );
+		}
+	}
+	return pathFound;
+}
+
+function BigreedyBestFirstSearch(){
+	
+	var pathFound = false;
+    
+    var startHeap = new minHeap();
+	var startprev = createPrev();
+    var startcosts = createDistances();
+	
+	var endHeap = new minHeap();
+	var endprev = createPrev();
+    var endcosts = createDistances();
+
+    var visited = actualVisited();
+    var intersecting_node = -1;
+    // set the distances nd costs for start cell and end cell =0 and visited as s nd e respectively
+
+    startcosts[ startCell[0] ][ startCell[1] ] = 0;
+    startHeap.push([0, [startCell[0], startCell[1]]]);
+    cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
+   
+    endcosts[ endCell[0] ][ endCell[1] ] = 0;
+	endHeap.push([0, [endCell[0], endCell[1]]]);
+  	cellsToAnimate.push([[endCell[0], endCell[1]], "searching"]);
+
+    while (!startHeap.isEmpty() && !endHeap.isEmpty()){
+        console.log("loop1");
+        // pop the position of start node which has the minimum cost 
+		var s_cell = startHeap.getMin();
+		console.log("s_cell is: " + s_cell);
+		var i = s_cell[1][0];
+		var j = s_cell[1][1];
+		if (visited[i][j] == null){ 
+			
+			visited[i][j] = 's';
+			cellsToAnimate.push([[i, j], "visited"]);
+
+			var start_neighbours = getNeighbours(i, j);
+			for (var k = 0; k < start_neighbours.length; k++){
+				console.log("loop2");
+	
+				var m = start_neighbours[k][0];
+				var n = start_neighbours[k][1];
+				if (visited[m][n] ==='s'){
+					 continue;
+					 }else
+				if(visited[m][n]==='e'){
+					intersecting_node = [m,n];
+					startprev[m][n] = [i,j];
+					break;
+				}
+				// visited[m][n]='s';
+				var newCost = ((Math.abs(endCell[0] - m) + Math.abs(endCell[1] - n)) + (weight *heuristics(type,m,n,'s')));
+				if (newCost < startcosts[m][n]){
+					startcosts[m][n] = newCost;
+					startprev[m][n] = [i, j];
+					startHeap.push([newCost, [m, n]]);
+					cellsToAnimate.push( [[m, n], "searching"] );
+				}
+			}	
+			
+		}
+		
+        
+        // pop the position of end node which has the minimum cost
+        var e_cell = endHeap.getMin();
+		 var r = e_cell[1][0];
+		 var c = e_cell[1][1];
+		if (visited[r][c] == null){ 
+			visited[r][c] = 'e';
+			cellsToAnimate.push([[r, c], "visited"]);
+			if (r == startCell[0] && c == startCell[1]){
+				pathFound = true;
+				break;
+			}
+			var end_neighbours = getNeighbours(r, c);
+			for (var k = 0; k < end_neighbours.length; k++){
+				console.log("loop3");
+				var m = end_neighbours[k][0];
+				var n = end_neighbours[k][1];
+				if (visited[m][n] ==='e'){
+					continue;
+					}else
+				if(visited[m][n]==='s'){
+					intersecting_node = [m,n];
+					endprev[m][n] = [r,c];
+					break;
+				}
+				// visited[m][n]='s';
+				var newCost = ((Math.abs(startCell[0] - m) + Math.abs(startCell[1] - n)) +  (weight *heuristics(type,m,n,'e')));
+				if (newCost < endcosts[m][n]){
+					endcosts[m][n] = newCost;
+					endprev[m][n] = [r, c];
+					endHeap.push([newCost, [m, n]]);
+					cellsToAnimate.push( [[m, n], "searching"] );
+				}
+		   }
+		
+			
+			
+		}
+		
+	   // If a intersecting node was found, illuminate the two paths
+		  if(intersecting_node !== -1){
+			pathFound =true;
+			console.log("intersecting node "+intersecting_node);
+	
+		  var r = intersecting_node[0];
+		  var c = intersecting_node[1];
+		  cellsToAnimate.push( [[r, c], "success"] );
+		  
+		  while (startprev[r][c] != null){
+			 console.log(" s prev console" + startprev[r][c]);
+			 var prevCell = startprev[r][c];
+			 r = prevCell[0];
+			 c = prevCell[1];
+	
+			 cellsToAnimate.push( [[r, c], "success"] );
+			}
+		
+			r = intersecting_node[0];
+			c = intersecting_node[1];
+			cellsToAnimate.push( [[r, c], "success"] );
+		 
+		  if(endprev[r][c]===null){
+			 console.log("t_prev for intersecting node is null");
+		   }
+		 
+		   while (endprev[r][c] != null){
+			 console.log("t_prev console" + endprev[r][c]);
+			 var prevCell = endprev[r][c];
+			 r = prevCell[0];
+			 c = prevCell[1];
+	
+			 cellsToAnimate.push( [[r, c], "success"] );
+			}
+	
+			break;
+
+    	}
+
+  
+    }
+	return pathFound;
+}
+
+
+
+
+
+
 
 async function animateCells(){
 	animationState = null;
