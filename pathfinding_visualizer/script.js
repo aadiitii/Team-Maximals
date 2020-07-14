@@ -13,7 +13,7 @@ var movingStart = false;
 var movingEnd = false;
 var allowDiagonal=false;
 var bidirectional=true;   // implement a func to set this variable true when that option is clicked
-var type ="chebyshev"; //create a func to set the type according to the selected option
+var type ="manhattan"; //create a func to set the type according to the selected option
 var weight =1;  // update this value according to the weight entered by the user
 
 function generateGrid( rows, cols ) {
@@ -1171,7 +1171,7 @@ function greedyBestFirstSearch() {
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
 			if (visited[m][n]){ continue; }
-			var newCost = ((Math.abs(endCell[0] - m) + Math.abs(endCell[1] - n))+ (weight *heuristics(type,m,n,'s')));
+			var newCost = ( weight *heuristics(type,m,n,'s'));
 			if (newCost < costs[m][n]){
 				prev[m][n] = [i, j];
 				costs[m][n] = newCost;
@@ -1247,7 +1247,7 @@ function BigreedyBestFirstSearch(){
 					break;
 				}
 				// visited[m][n]='s';
-				var newCost = ((Math.abs(endCell[0] - m) + Math.abs(endCell[1] - n)) + (weight *heuristics(type,m,n,'s')));
+				var newCost = (weight *heuristics(type,m,n,'s'));
 				if (newCost < startcosts[m][n]){
 					startcosts[m][n] = newCost;
 					startprev[m][n] = [i, j];
@@ -1284,7 +1284,7 @@ function BigreedyBestFirstSearch(){
 					break;
 				}
 				// visited[m][n]='s';
-				var newCost = ((Math.abs(startCell[0] - m) + Math.abs(startCell[1] - n)) +  (weight *heuristics(type,m,n,'e')));
+				var newCost = (weight *heuristics(type,m,n,'e'));
 				if (newCost < endcosts[m][n]){
 					endcosts[m][n] = newCost;
 					endprev[m][n] = [r, c];
