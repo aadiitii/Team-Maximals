@@ -1,4 +1,3 @@
-
 var totalRows = 25;
 var totalCols = 40;
 var inProgress = false;
@@ -11,10 +10,12 @@ var endCell = [11, 25];
 var cellsToAnimate = [];
 var movingStart = false;
 var movingEnd = false;
-var allowDiagonal=false;
+var length = 0;
 var bidirectional=true;   // implement a func to set this variable true when that option is clicked
-var type ="manhattan"; //create a func to set the type according to the selected option
-var weight =1;  // update this value according to the weight entered by the user
+var type ="octile"; //create a func to set the type according to the selected option
+var weight = 1;  // update this value according to the weight entered by the user
+var diagonalMovement = "Always";
+var allowadiagonal = true;
 
 function generateGrid( rows, cols ) {
     var grid = "<table>";
@@ -331,15 +332,9 @@ function updateResults(duration, pathFound, length){
 // to set the var allowadiagonal true when that button is clicked
  //function allowDiagonal(){}
 function countLength(){
-	var cells = $("td");
-	var l = 0;
-	for (var i = 0; i < cells.length; i++){
-		if ($(cells[i]).hasClass("success")){
-			l++;
-		}
-	}
-	return l;
+	return length;
 }
+
 async function traverseGraph(algorithm){
     inProgress = true;
 	Board( keepWalls = true );
@@ -417,30 +412,97 @@ function createPrev(){
 	return prev;
 }
 
-function getNeighbours(i, j,allowDiagonal){
+function getNeighbours(i, j, diagonalMovement){
 	var neighbours = [];
-	
 	var cells = $("#tableContainer").find("td");
-	if(allowDiagonal){
-		if ( i > 0 ){ neighbours.push( [i - 1, j] );} //top
-		if( i > 0 && j < (totalCols - 1) ){neighbours.push( [i - 1, j+1] );} //top-right
-		if ( j < (totalCols - 1) ){ neighbours.push( [i, j + 1] );} //right
-	    if(i < (totalRows - 1) && j < (totalCols - 1) ){ neighbours.push( [i + 1, j + 1] );} //bottom-right
-		if ( i < (totalRows - 1) ){ neighbours.push( [i + 1, j] );} //bottom
-		if(i < (totalRows - 1) && j > 0){ neighbours.push( [i + 1, j - 1] );} // bottom-left
-		if ( j > 0 ){ neighbours.push( [i, j - 1] );} //left
-		if(i > 0 && j > 0){ neighbours.push( [i - 1, j - 1] );} // top-left
-	}else{
-		if ( i > 0 && !cellIsAWall(i-1,j,cells) ){ neighbours.push( [i - 1, j] );} //top
-		if ( j < (totalCols - 1)   && !cellIsAWall(i,j+1,cells)){ neighbours.push( [i, j + 1] );} //right
-		if ( i < (totalRows - 1)   && !cellIsAWall(i+1,j,cells)){ neighbours.push( [i + 1, j] );} //bottom
-		if ( j > 0  && !cellIsAWall(i,j-1,cells) ){ neighbours.push( [i, j - 1] );} //left
+	var s0 = null;
+	var s1 = null;
+	var s2 = null; 
+	var s3 = null;
+	var d0 = null;
+	var d1 = null;
+	var d2 = null;
+	var d3 = null;
 
-		
-	}
+	if ( i > 0 && (i < totalRows -1 )&& !cellIsAWall(i-1,j,cells) ){ 
+		//neighbours.push( [i - 1, j] );
+		s0=true;
+	} //top
+	if ( j < (totalCols - 1) && j>0  && !cellIsAWall(i,j+1,cells)){
+		 //neighbours.push( [i, j + 1] );
+		 s1 = true;
+		} //right
+	if (i>0 && i < (totalRows - 1)   && !cellIsAWall(i+1,j,cells)){
+		 //neighbours.push( [i + 1, j] );
+		s2 = true;
+		} //bottom
+	if ( j > 0 && (j < totalCols-1)  && !cellIsAWall(i,j-1,cells) ){
+		 //neighbours.push( [i, j - 1] );
+		s3= true;
+		} //left
+
 	
+	if (diagonalMovement === "OnlyWhenNoObstacles") {
+		d0 = s3 && s0;
+		d1 = s0 && s1;
+		d2 = s1 && s2;
+		d3 = s2 && s3;
+	} else if (diagonalMovement === "IfAtMostOneObstacle") {
+		d0 = s3 || s0;
+		d1 = s0 || s1;
+		d2 = s1 || s2;
+		d3 = s2 || s3;
+	} else if (diagonalMovement === "Never") {
+		d0 =false;
+		d1 = false;
+		d2 = false;
+		d3 = false;
+	} else if (diagonalMovement === "Always") {
+		d0 = true;
+		d1 = true;
+		d2 = true;
+		d3 = true;
+		
+	} else {
+		// throw new Error('Incorrect value of diagonalMovement');
+		console.log("ERROR in  diagonal movement");
+	}
+
+	// ↖
+	if (d0 && !cellIsAWall(i - 1, j - 1, cells)) {
+		neighbours.push([i- 1,j - 1]);
+	}
+	if(s0){
+		neighbours.push( [i - 1, j] );
+	}
+
+	// ↗
+	if (d1 && !cellIsAWall(i - 1, j + 1, cells)) {
+		neighbours.push([i - 1, j + 1]);
+	}
+
+	if(s1){
+		neighbours.push( [i, j + 1] );
+	}
+	// ↘
+	if (d2 && !cellIsAWall(i + 1, j + 1, cells)) {
+		neighbours.push([i + 1, j + 1]);
+	}
+	if(s2){
+		neighbours.push( [i + 1, j] );
+	}
+	// ↙
+	if (d3 && !cellIsAWall(i + 1, j - 1, cells)) {
+		neighbours.push([i + 1, j - 1]);
+	}
+	if(s3){
+		neighbours.push( [i, j - 1] );
+	}
+	console.log(neighbours);
 	return neighbours;
-}
+};
+
+
 function createDistances(){
 	var distances = [];
 	for (var i = 0; i < totalRows; i++){
@@ -452,6 +514,7 @@ function createDistances(){
 	}
 	return distances;
 }
+
 function heuristics(type,i,j,pos){
 	if(pos== 'e'){
 		var dx = Math.abs(startCell[0] - i);
@@ -478,21 +541,6 @@ function heuristics(type,i,j,pos){
   
 }
 
-// // To get intersecting node
-// function isIntersecting(s_visited,t_visited){
-
-// 	var intersecting_node = -1;
-
-// 	i= Math.min(startCell[0] , endCell[0]);
-// 	j=Math.min(startCell[1], endCell[1]);
-// 	for(i; i<totalRows; i++){
-// 		for(j; j<totalCols; j++){
-// 			if(s_visited[i][j] && t_visited[i][j])
-// 			 intersecting_node = ([i,j]);
-// 		}
-// 	}
-// 	return intersecting_node;
-// }
 function BFS(){
 	var pathFound = false;
 	var myQueue = new Array();
@@ -512,43 +560,46 @@ function BFS(){
 			break;
 		}
 		// Put neighboring cells in queue
-		var neighbours = getNeighbours(r, c,allowDiagonal);
+		var neighbours = getNeighbours(r, c,diagonalMovement);
 		console.log(neighbours);
 		for (var k = 0; k < neighbours.length; k++){
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
 			//if ( visited[m][n] ) { continue ;}
-			if ( visited[m][n] ) { continue ;}
+			if ( visited[m][n]!==null) { continue ;}
 			visited[m][n] = true;
 			prev[m][n] = [r, c];
 			cellsToAnimate.push( [neighbours[k], "searching"] );
 			myQueue.unshift(neighbours[k]);
 		}
 	}
-	// Make any nodes still in the queue "visited"
-	while ( myQueue.length > 0){
-		var cell = myQueue.pop();
-		var r = cell[0];
-		var c = cell[1];
-		cellsToAnimate.push( [cell, "visited"] );
-	}
+	// // Make any nodes still in the queue "visited"
+	// while ( myQueue.length > 0){
+	// 	var cell = myQueue.pop();
+	// 	var r = cell[0];
+	// 	var c = cell[1];
+	// 	cellsToAnimate.push( [cell, "visited"] );
+	// }
 	// If a path was found, illuminate it
 	if (pathFound) {
+		var sum=0;
 		var r = endCell[0];
 		var c = endCell[1];
-		cellsToAnimate.push( [[r, c], "success"] );
+		cellsToAnimate.push( [endCell, "success"] );
 		while (prev[r][c] != null){
-			console.log(prev[r][c]);
+			var a = r,b=c; 
 			var prevCell = prev[r][c];
+			
 			r = prevCell[0];
 			c = prevCell[1];
-
-			cellsToAnimate.push( [[r, c], "success"] );
+			var dx = a-r,dy = b-c;
+			sum+= Math.sqrt(dx*dx +dy*dy);
+			cellsToAnimate.push( [[r,c], "success"] );
 		}
+		length =sum.toFixed(2) ;
 	}
 	return pathFound;
 }
-
 
 function biBFS(){
     var pathFound = false;
@@ -584,8 +635,8 @@ function biBFS(){
         
  
 				// Put neighboring cells in queue
-				var s_neighbours = getNeighbours(s_r,s_c,allowDiagonal);
-				var t_neighbours = getNeighbours(t_r,t_c,allowDiagonal);
+				var s_neighbours = getNeighbours(s_r,s_c,diagonalMovement);
+				var t_neighbours = getNeighbours(t_r,t_c,diagonalMovement);
 			
 			 // neighbours for end or target node
              for (var p = 0; p < t_neighbours.length ; p++){
@@ -635,53 +686,67 @@ function biBFS(){
         
          // check for intersecting node
           
-            if(intersecting_node !== -1){
-                pathFound =true;
-                console.log("intersecting node "+intersecting_node);
-
-              var r = intersecting_node[0];
-              var c = intersecting_node[1];
-              cellsToAnimate.push( [[r, c], "success"] );
-			  
-			  while (s_prev[r][c] != null){
-                 console.log(" s prev console" + s_prev[r][c]);
-                 var prevCell = s_prev[r][c];
-                 r = prevCell[0];
-                 c = prevCell[1];
-      
-                 cellsToAnimate.push( [[r, c], "success"] );
-                }
+		 if(intersecting_node !== -1){
+			pathFound =true;
+			console.log("intersecting node "+intersecting_node);
+		  
+		  var sum =0;
+		  var r = intersecting_node[0];
+		  var c = intersecting_node[1];
+		  cellsToAnimate.push( [[r, c], "success"] );
+		  
+		  while (s_prev[r][c] != null){
+			 var a = r, b = c;
+			 console.log(" s prev console" + s_prev[r][c]);
+			 var prevCell = s_prev[r][c];
+			 r = prevCell[0];
+			 c = prevCell[1];
 			
-				r = intersecting_node[0];
-				c = intersecting_node[1];
-				cellsToAnimate.push( [[r, c], "success"] );
-			 
-			  if(t_prev[r][c]===null){
-				 console.log("t_prev for intersecting node is null");
-			   }
-			 
-			   while (t_prev[r][c] != null){
-                 console.log("t_prev console" + t_prev[r][c]);
-                 var prevCell = t_prev[r][c];
-                 r = prevCell[0];
-                 c = prevCell[1];
-      
-                 cellsToAnimate.push( [[r, c], "success"] );
-                }
- 
-                break;
-            }
-            
+			var dx = a-r, dy = b-c;
+			sum += Math.sqrt(dx*dx + dy*dy);
+			 cellsToAnimate.push( [[r, c], "success"] );
+			}
+		
+			r = intersecting_node[0];
+			c = intersecting_node[1];
+			cellsToAnimate.push( [[r, c], "success"] );
+		 
+		  if(t_prev[r][c]===null){
+			 console.log("t_prev for intersecting node is null");
+		   }
+		 
+		   while (t_prev[r][c] != null){
+			 a = r, b = c;
+			 console.log("t_prev console" + t_prev[r][c]);
+			 var prevCell = t_prev[r][c];
+			 r = prevCell[0];
+			 c = prevCell[1];
+			 var dx = a-r, dy = b-c;
+			 sum += Math.sqrt(dx*dx + dy*dy);
+			 cellsToAnimate.push( [[r, c], "success"] );
+			}
+		length = sum.toFixed(2);
+		break;
+		}
     }
- 
- 
- 
-    // animation for path  if required to implement all together
 	 
     return pathFound;
 }
 
+
 function AStar() {
+	if (!diagonalMovement) {
+		if (!allowDiagonal) {
+			diagonalMovement = "Never";
+		} else {
+			if (dontCrossCorners) {
+				diagonalMovement = "OnlyWhenNoObstacles";
+			} else {
+				diagonalMovement = "IfAtMostOneObstacle";
+			}
+		}
+	}
+	
 	var pathFound = false;
 	var myHeap = new minHeap();
 	var prev = createPrev();
@@ -695,59 +760,74 @@ function AStar() {
 	cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
 	while (!myHeap.isEmpty()){
 		var cell = myHeap.getMin();
+		console.log("cell is " + cell);
 		var i = cell[1][0];
 		var j = cell[1][1];
-		if (visited[i][j]!==null){ continue; }
-		visited[i][j] = true;
-		cellsToAnimate.push([[i, j], "visited"]);
-		if (i == endCell[0] && j == endCell[1]){
-			pathFound = true;
-			break;
-		}
-		var neighbours = getNeighbours(i, j);
-		for (var k = 0; k < neighbours.length; k++){
-			var m = neighbours[k][0];
-			var n = neighbours[k][1];
-			if (visited[m][n]!==null){ continue; }
-			var newDistance = distances[i][j] + 1;
-			if (newDistance < distances[m][n]){
-				distances[m][n] = newDistance;
-				prev[m][n] = [i, j];
-				cellsToAnimate.push( [[m, n], "searching"] );
+		// if (visited[i][j]!==null){ continue; }
+		if(visited[i][j]===null){
+			visited[i][j] = true;
+			cellsToAnimate.push([[i, j], "visited"]);
+			if (i == endCell[0] && j == endCell[1]){
+				pathFound = true;
+				break;
 			}
-			// manhattan dist used
-			var newCost = distances[i][j] + (weight *heuristics(type,m,n,'s'));
-			if (newCost < costs[m][n]){
-				costs[m][n] = newCost;
-				myHeap.push([newCost, [m, n]]);
-			}
+			var neighbours = getNeighbours(i, j, diagonalMovement);
+			for (var k = 0; k < neighbours.length; k++){
+				var m = neighbours[k][0];
+				var n = neighbours[k][1];
+				console.log("m,n" + m + "," +n); 
+				//console.log("visited" + visited[m][n]);
+				if (visited[m][n]===null){
+					var newDistance = distances[i][j] + (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));
+					console.log("distance" + newDistance);
+					if (newDistance < distances[m][n]){
+						distances[m][n] = newDistance;
+						prev[m][n] = [i, j];
+						cellsToAnimate.push( [[m, n], "searching"] );
+					}
+					// manhattan dist used
+					var newCost = distances[i][j] + (weight *heuristics(type,m,n,'s'));
+					if (newCost < costs[m][n]){
+						costs[m][n] = newCost;
+						myHeap.push([newCost, [m, n]]);
+					}
+				}
 		}
 	}
-	// Make any nodes still in the heap "visited"
-	// while ( !myHeap.isEmpty() ){
-	// 	var cell = myHeap.getMin();
-	// 	var i = cell[1][0];
-	// 	var j = cell[1][1];
-	// 	if (visited[i][j] !==null){ continue; }
-	// 	visited[i][j] = true;
-	// 	cellsToAnimate.push( [[i, j], "visited"] );
-	// }
+}
 
-    // If a path was found, illuminate it
 	if (pathFound) {
+		var sum=0;
 		var i = endCell[0];
 		var j = endCell[1];
 		cellsToAnimate.push( [endCell, "success"] );
 		while (prev[i][j] != null){
+			var a = i,b=j; 
 			var prevCell = prev[i][j];
+			
 			i = prevCell[0];
 			j = prevCell[1];
+			var dx = a-i,dy = b-j;
+			sum+= Math.sqrt(dx*dx +dy*dy);
 			cellsToAnimate.push( [[i, j], "success"] );
 		}
+		length =sum.toFixed(2) ;
 	}
 	return pathFound;
 }
+
 function BiAStar() {
+	if (!diagonalMovement) {
+		if (!allowDiagonal) {
+			diagonalMovement = "Never";
+		} else {
+			if (dontCrossCorners) {
+				diagonalMovement = "OnlyWhenNoObstacles";
+			} else {
+				diagonalMovement = "IfAtMostOneObstacle";
+			}
+		}
+	}
 	
 	var pathFound = false;
     
@@ -790,7 +870,7 @@ function BiAStar() {
 			// 	pathFound = true;
 			// 	break;
 			// }
-			var start_neighbours = getNeighbours(i, j);
+			var start_neighbours = getNeighbours(i, j, diagonalMovement);
 			for (var k = 0; k < start_neighbours.length; k++){
 				console.log("loop2");
 	
@@ -805,7 +885,7 @@ function BiAStar() {
 					break;
 				}
 				// visited[m][n]='s';
-				var newDistance = startdistances[i][j] + 1; //check for root2 
+				var newDistance = startdistances[i][j]+  (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));
 				if (newDistance < startdistances[m][n]){
 					startdistances[m][n] = newDistance;
 					startprev[m][n] = [i, j];
@@ -833,7 +913,7 @@ function BiAStar() {
 				pathFound = true;
 				break;
 			}
-			var end_neighbours = getNeighbours(r, c);
+			var end_neighbours = getNeighbours(r, c, diagonalMovement);
 			for (var k = 0; k < end_neighbours.length; k++){
 				console.log("loop3");
 				var m = end_neighbours[k][0];
@@ -847,7 +927,7 @@ function BiAStar() {
 					break;
 				}
 				// visited[m][n]='s';
-				var newDistance = enddistances[r][c] + 1; //check for root2 
+				var newDistance = enddistances[r][c] + (( m-r ===0 || n-c ===0) ? 1 :Math.sqrt(2));
 				if (newDistance < enddistances[m][n]){
 					enddistances[m][n] = newDistance;
 					endprev[m][n] = [r, c];
@@ -866,52 +946,48 @@ function BiAStar() {
 		}
 		
 	   // If a intersecting node was found, illuminate the two paths
-		  if(intersecting_node !== -1){
-			pathFound =true;
-			console.log("intersecting node "+intersecting_node);
-	
-		  var r = intersecting_node[0];
-		  var c = intersecting_node[1];
-		  cellsToAnimate.push( [[r, c], "success"] );
-		  
-		  while (startprev[r][c] != null){
-			 console.log(" s prev console" + startprev[r][c]);
-			 var prevCell = startprev[r][c];
-			 r = prevCell[0];
-			 c = prevCell[1];
-	
-			 cellsToAnimate.push( [[r, c], "success"] );
-			}
+	   if(intersecting_node !== -1){
+		pathFound =true;
+		console.log("intersecting node "+intersecting_node);
+	  
+	  var sum =0;
+	  var r = intersecting_node[0];
+	  var c = intersecting_node[1];
+	  cellsToAnimate.push( [[r, c], "success"] );
+	  
+	  while (startprev[r][c] != null){
+		 var a = r, b = c;
+		 console.log(" s prev console" + startprev[r][c]);
+		 var prevCell = startprev[r][c];
+		 r = prevCell[0];
+		 c = prevCell[1];
 		
-			r = intersecting_node[0];
-			c = intersecting_node[1];
-			cellsToAnimate.push( [[r, c], "success"] );
-		 
-		  if(endprev[r][c]===null){
-			 console.log("t_prev for intersecting node is null");
-		   }
-		 
-		   while (endprev[r][c] != null){
-			 console.log("t_prev console" + endprev[r][c]);
-			 var prevCell = endprev[r][c];
-			 r = prevCell[0];
-			 c = prevCell[1];
+		var dx = a-r, dy = b-c;
+		sum += Math.sqrt(dx*dx + dy*dy);
+		 cellsToAnimate.push( [[r, c], "success"] );
+		}
 	
-			 cellsToAnimate.push( [[r, c], "success"] );
-			}
-	
-			break;
-
-    	}
-		// Make any nodes still in the heap "visited"
-		// while ( !myHeap.isEmpty() ){
-		// 	var cell = myHeap.getMin();
-		// 	var i = cell[1][0];
-		// 	var j = cell[1][1];
-		// 	if (visited[i][j] !==null){ continue; }
-		// 	visited[i][j] = true;
-		// 	cellsToAnimate.push( [[i, j], "visited"] );
-		// }
+		r = intersecting_node[0];
+		c = intersecting_node[1];
+		cellsToAnimate.push( [[r, c], "success"] );
+	 
+	  if(endprev[r][c]===null){
+		 console.log("t_prev for intersecting node is null");
+	   }
+	 
+	   while (endprev[r][c] != null){
+		 a = r, b = c;
+		 console.log("t_prev console" + endprev[r][c]);
+		 var prevCell = endprev[r][c];
+		 r = prevCell[0];
+		 c = prevCell[1];
+		 var dx = a-r, dy = b-c;
+		 sum += Math.sqrt(dx*dx + dy*dy);
+		 cellsToAnimate.push( [[r, c], "success"] );
+		}
+	length = sum.toFixed(2);
+	break;
+	}
 
   
     }
@@ -924,6 +1000,17 @@ function BiAStar() {
 
 
 function dijkstra() {
+	if (!diagonalMovement) {
+		if (!allowDiagonal) {
+			diagonalMovement = "Never";
+		} else {
+			if (dontCrossCorners) {
+				diagonalMovement = "OnlyWhenNoObstacles";
+			} else {
+				diagonalMovement = "IfAtMostOneObstacle";
+			}
+		}
+	}
 	var pathFound = false;
 	var myHeap = new minHeap();
 	var prev = createPrev();
@@ -937,19 +1024,19 @@ function dijkstra() {
 		//console.log("Min was just popped from the heap! Heap is now: " + JSON.stringify(myHeap.heap));
 		var i = cell[1][0];
 		var j = cell[1][1];
-		if (visited[i][j]){ continue; }
+		if (visited[i][j] === null){
 		visited[i][j] = true;
 		cellsToAnimate.push([[i, j], "visited"]);
 		if (i == endCell[0] && j == endCell[1]){
 			pathFound = true;
 			break;
 		}
-		var neighbours = getNeighbours(i, j);
+		var neighbours = getNeighbours(i, j, diagonalMovement);
 		for (var k = 0; k < neighbours.length; k++){
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
-			if (visited[m][n]){ continue; }
-			var newDistance = distances[i][j] + 1;
+			if (visited[m][n] === null){
+			var newDistance = distances[i][j] + (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));
 			if (newDistance < distances[m][n]){
 				distances[m][n] = newDistance;
 				prev[m][n] = [i, j];
@@ -958,29 +1045,28 @@ function dijkstra() {
 				cellsToAnimate.push( [[m, n], "searching"] );
 			}
 		}
-		//console.log("Cell [" + i + ", " + j + "] was just evaluated! myHeap is now: " + JSON.stringify(myHeap.heap));
 	}
-	//console.log(JSON.stringify(myHeap.heap));
-	// Make any nodes still in the heap "visited"
-	// while ( !myHeap.isEmpty() ){
-	// 	var cell = myHeap.getMin();
-	// 	var i = cell[1][0];
-	// 	var j = cell[1][1];
-	// 	if (visited[i][j]){ continue; }
-	// 	visited[i][j] = true;
-	// 	cellsToAnimate.push( [[i, j], "visited"] );
-	// }
-	// If a path was found, illuminate it
+	}
+	}
+
+
+	// Path animation
 	if (pathFound) {
+		var sum=0;
 		var i = endCell[0];
 		var j = endCell[1];
 		cellsToAnimate.push( [endCell, "success"] );
 		while (prev[i][j] != null){
+			var a = i,b=j; 
 			var prevCell = prev[i][j];
+			
 			i = prevCell[0];
 			j = prevCell[1];
+			var dx = a-i,dy = b-j;
+			sum+= Math.sqrt(dx*dx +dy*dy);
 			cellsToAnimate.push( [[i, j], "success"] );
 		}
+		length =sum.toFixed(2) ;
 	}
 	return pathFound;
 }
@@ -1024,7 +1110,7 @@ function Bidijkstra(){
 			// 	pathFound = true;
 			// 	break;
 			// }
-			var start_neighbours = getNeighbours(i, j);
+			var start_neighbours = getNeighbours(i, j, diagonalMovement);
 			for (var k = 0; k < start_neighbours.length; k++){
 				console.log("loop2");
 	
@@ -1039,7 +1125,7 @@ function Bidijkstra(){
 					break;
 				}
 				// visited[m][n]='s';
-				var newDistance = startdistances[i][j] + 1; //check for root2 
+				var newDistance = startdistances[i][j] + (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));//check for root2 
 				if (newDistance < startdistances[m][n]){
 					startdistances[m][n] = newDistance;
 					startprev[m][n] = [i, j];
@@ -1062,7 +1148,7 @@ function Bidijkstra(){
 				pathFound = true;
 				break;
 			}
-			var end_neighbours = getNeighbours(r, c);
+			var end_neighbours = getNeighbours(r, c, diagonalMovement);
 			for (var k = 0; k < end_neighbours.length; k++){
 				console.log("loop3");
 				var m = end_neighbours[k][0];
@@ -1076,7 +1162,7 @@ function Bidijkstra(){
 					break;
 				}
 				// visited[m][n]='s';
-				var newDistance = enddistances[r][c] + 1; //check for root2 
+				var newDistance = enddistances[r][c] + (( m-r ===0 || n-c ===0) ? 1 :Math.sqrt(2));//check for root2 
 				if (newDistance < enddistances[m][n]){
 					enddistances[m][n] = newDistance;
 					endprev[m][n] = [r, c];
@@ -1090,43 +1176,49 @@ function Bidijkstra(){
 		}
 		
 	   // If a intersecting node was found, illuminate the two paths
-		  if(intersecting_node !== -1){
-			pathFound =true;
-			console.log("intersecting node "+intersecting_node);
-	
-		  var r = intersecting_node[0];
-		  var c = intersecting_node[1];
-		  cellsToAnimate.push( [[r, c], "success"] );
-		  
-		  while (startprev[r][c] != null){
-			 console.log(" s prev console" + startprev[r][c]);
-			 var prevCell = startprev[r][c];
-			 r = prevCell[0];
-			 c = prevCell[1];
-	
-			 cellsToAnimate.push( [[r, c], "success"] );
-			}
+	   if(intersecting_node !== -1){
+		pathFound =true;
+		console.log("intersecting node "+intersecting_node);
+	  
+	  var sum =0;
+	  var r = intersecting_node[0];
+	  var c = intersecting_node[1];
+	  cellsToAnimate.push( [[r, c], "success"] );
+	  
+	  while (startprev[r][c] != null){
+		 var a = r, b = c;
+		 console.log(" s prev console" + startprev[r][c]);
+		 var prevCell = startprev[r][c];
+		 r = prevCell[0];
+		 c = prevCell[1];
 		
-			r = intersecting_node[0];
-			c = intersecting_node[1];
-			cellsToAnimate.push( [[r, c], "success"] );
-		 
-		  if(endprev[r][c]===null){
-			 console.log("t_prev for intersecting node is null");
-		   }
-		 
-		   while (endprev[r][c] != null){
-			 console.log("t_prev console" + endprev[r][c]);
-			 var prevCell = endprev[r][c];
-			 r = prevCell[0];
-			 c = prevCell[1];
+		var dx = a-r, dy = b-c;
+		sum += Math.sqrt(dx*dx + dy*dy);
+		 cellsToAnimate.push( [[r, c], "success"] );
+		}
 	
-			 cellsToAnimate.push( [[r, c], "success"] );
-			}
-	
-			break;
-
-    	}
+		r = intersecting_node[0];
+		c = intersecting_node[1];
+		cellsToAnimate.push( [[r, c], "success"] );
+	 
+	  if(endprev[r][c]===null){
+		 console.log("t_prev for intersecting node is null");
+	   }
+	 
+	   while (endprev[r][c] != null){
+		 a = r, b = c;
+		 console.log("t_prev console" + endprev[r][c]);
+		 var prevCell = endprev[r][c];
+		 r = prevCell[0];
+		 c = prevCell[1];
+		 var dx = a-r, dy = b-c;
+		 sum += Math.sqrt(dx*dx + dy*dy);
+		 cellsToAnimate.push( [[r, c], "success"] );
+		}
+	length = sum.toFixed(2);
+	break;
+	}
+    	
 		// Make any nodes still in the heap "visited"
 		// while ( !myHeap.isEmpty() ){
 		// 	var cell = myHeap.getMin();
@@ -1166,7 +1258,7 @@ function greedyBestFirstSearch() {
 			pathFound = true;
 			break;
 		}
-		var neighbours = getNeighbours(i, j);
+		var neighbours = getNeighbours(i, j, diagonalMovement);
 		for (var k = 0; k < neighbours.length; k++){
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
@@ -1183,15 +1275,21 @@ function greedyBestFirstSearch() {
 
 	// If a path was found, illuminate it
 	if (pathFound) {
+		var sum=0;
 		var i = endCell[0];
 		var j = endCell[1];
 		cellsToAnimate.push( [endCell, "success"] );
 		while (prev[i][j] != null){
+			var a = i,b=j; 
 			var prevCell = prev[i][j];
+			
 			i = prevCell[0];
 			j = prevCell[1];
+			var dx = a-i,dy = b-j;
+			sum+= Math.sqrt(dx*dx +dy*dy);
 			cellsToAnimate.push( [[i, j], "success"] );
 		}
+		length =sum.toFixed(2) ;
 	}
 	return pathFound;
 }
@@ -1232,7 +1330,7 @@ function BigreedyBestFirstSearch(){
 			visited[i][j] = 's';
 			cellsToAnimate.push([[i, j], "visited"]);
 
-			var start_neighbours = getNeighbours(i, j);
+			var start_neighbours = getNeighbours(i, j, diagonalMovement);
 			for (var k = 0; k < start_neighbours.length; k++){
 				console.log("loop2");
 	
@@ -1270,7 +1368,7 @@ function BigreedyBestFirstSearch(){
 				pathFound = true;
 				break;
 			}
-			var end_neighbours = getNeighbours(r, c);
+			var end_neighbours = getNeighbours(r, c, diagonalMovement);
 			for (var k = 0; k < end_neighbours.length; k++){
 				console.log("loop3");
 				var m = end_neighbours[k][0];
@@ -1298,43 +1396,48 @@ function BigreedyBestFirstSearch(){
 		}
 		
 	   // If a intersecting node was found, illuminate the two paths
-		  if(intersecting_node !== -1){
-			pathFound =true;
-			console.log("intersecting node "+intersecting_node);
-	
-		  var r = intersecting_node[0];
-		  var c = intersecting_node[1];
-		  cellsToAnimate.push( [[r, c], "success"] );
-		  
-		  while (startprev[r][c] != null){
-			 console.log(" s prev console" + startprev[r][c]);
-			 var prevCell = startprev[r][c];
-			 r = prevCell[0];
-			 c = prevCell[1];
-	
-			 cellsToAnimate.push( [[r, c], "success"] );
-			}
+	   if(intersecting_node !== -1){
+		pathFound =true;
+		console.log("intersecting node "+intersecting_node);
+	  
+	  var sum =0;
+	  var r = intersecting_node[0];
+	  var c = intersecting_node[1];
+	  cellsToAnimate.push( [[r, c], "success"] );
+	  
+	  while (startprev[r][c] != null){
+		 var a = r, b = c;
+		 console.log(" s prev console" + startprev[r][c]);
+		 var prevCell = startprev[r][c];
+		 r = prevCell[0];
+		 c = prevCell[1];
 		
-			r = intersecting_node[0];
-			c = intersecting_node[1];
-			cellsToAnimate.push( [[r, c], "success"] );
-		 
-		  if(endprev[r][c]===null){
-			 console.log("t_prev for intersecting node is null");
-		   }
-		 
-		   while (endprev[r][c] != null){
-			 console.log("t_prev console" + endprev[r][c]);
-			 var prevCell = endprev[r][c];
-			 r = prevCell[0];
-			 c = prevCell[1];
+		var dx = a-r, dy = b-c;
+		sum += Math.sqrt(dx*dx + dy*dy);
+		 cellsToAnimate.push( [[r, c], "success"] );
+		}
 	
-			 cellsToAnimate.push( [[r, c], "success"] );
-			}
-	
-			break;
-
-    	}
+		r = intersecting_node[0];
+		c = intersecting_node[1];
+		cellsToAnimate.push( [[r, c], "success"] );
+	 
+	  if(endprev[r][c]===null){
+		 console.log("t_prev for intersecting node is null");
+	   }
+	 
+	   while (endprev[r][c] != null){
+		 a = r, b = c;
+		 console.log("t_prev console" + endprev[r][c]);
+		 var prevCell = endprev[r][c];
+		 r = prevCell[0];
+		 c = prevCell[1];
+		 var dx = a-r, dy = b-c;
+		 sum += Math.sqrt(dx*dx + dy*dy);
+		 cellsToAnimate.push( [[r, c], "success"] );
+		}
+	length = sum.toFixed(2);
+	break;
+	}
 
   
     }
