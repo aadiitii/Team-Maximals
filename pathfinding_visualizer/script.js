@@ -1,4 +1,4 @@
-var totalRows = 25;
+var totalRows = 20;
 var totalCols = 40;
 var inProgress = false;
 var createWalls = false;
@@ -14,7 +14,7 @@ var length = 0;
 var bidirectional=true;   // implement a func to set this variable true when that option is clicked
 var type ="octile"; //create a func to set the type according to the selected option
 var weight = 1;  // update this value according to the weight entered by the user
-var diagonalMovement = "Always";
+var diagonalMovement = "Never";
 var allowadiagonal = true;
 
 function generateGrid( rows, cols ) {
@@ -214,6 +214,21 @@ $( "#speed .dropdown-item").click(function(){
 	console.log("Speed has been changd to: " + animationSpeed);
 });
 
+$( "#diagonal .dropdown-item").click(function(){
+	if ( inProgress ){ update("wait"); return; }
+	diagonalMovement = $(this).text();
+	UpdateDiagonalMovement();
+	console.log("DiagonalMovement has been changd to: " + diagonalMovement);
+});
+
+
+$( "#type .dropdown-item").click(function(){
+	if ( inProgress ){ update("wait"); return; }
+	type = $(this).text();
+	Updateheuristics();
+	console.log("DiagonalMovement has been changd to: " + type);
+});
+
 
 
 /* ----------------- */
@@ -262,6 +277,32 @@ function updateSpeedDisplay(){
 		$(".speedDisplay").text("Speed: Normal");
 	} else if (animationSpeed == "Fast"){
 		$(".speedDisplay").text("Speed: Fast");
+	}
+	return;
+}
+
+function UpdateDiagonalMovement(){
+	if (diagonalMovement == "Never"){
+		$(".diagonalDisplay").text("DM: Never");
+	} else if (diagonalMovement== "Always"){
+		$(".diagonalDisplay").text("DM: Always");
+	} else if (diagonalMovement== "OnlyWhenNoObstacles"){
+		$(".diagonalDisplay").text("DM:No Obstacle");
+	} else if (diagonalMovement== "IfAtMostOneObstacle"){
+		$(".diagonalDisplay").text("DM: When One Obstacles");
+	}
+	return;
+}
+
+function Updateheuristics(){
+	if (type == "manhattan"){
+		$(".heuristicdisplay").text("manhattan");
+	} else if (type == "octile"){
+		$(".heuristicdisplay").text("octile");
+	} else if (type == "euclidean"){
+		$(".heuristicdisplay").text("euclidean");
+	} else if (type == "chebyshev"){
+		$(".heuristicdisplay").text("chebyshev");
 	}
 	return;
 }
@@ -350,6 +391,21 @@ async function traverseGraph(algorithm){
 	inProgress = false;
 	justFinished = true;
 }
+
+// function UpdateDiagonal(){
+// 	if (diagonalMovement == "Never"){
+// 		diagonalMovement == "Never";
+// 	} else if (diagonalMovement== "Always"){
+// 		diagonalMovement == "Always";
+// 	} else if (diagonalMovement== "When No Obstacle"){
+// 		diagonalMovement == "OnlyWhenNoObstacles";
+// 	} else if (diagonalMovement== "When Atmost One Obstacle"){
+// 		diagonalMovement== "IfAtmostOneObstacle";
+// 	}
+// 	return;
+// }
+// UpdateDiagonal();
+
 
 function executeAlgo(){
 	if (algorithm == "Depth-First Search (DFS)"){

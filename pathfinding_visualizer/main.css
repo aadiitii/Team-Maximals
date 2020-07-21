@@ -1,13 +1,14 @@
 body { 
     padding-top: 80px; 
 	height: 100%;
-	background-image:url("https://thumbs-prod.si-cdn.com/EXZEKoICe9HcGSg6UzK7g7s8dbw=/fit-in/1600x0/https://public-media.si-cdn.com/filer/3c/2a/3c2af135-c333-4262-a5d9-91d596494c1e/mars_surface.jpg");
-}
+	/* background-color:navy; */
 
+		background-image: url("https://sm.mashable.com/t/mashable_in/photo/default/nasa-galaxy_9pu4.960.jpg");
+}
 td {
     border: 1px solid #fcf8f8;
-    width: 20px;
-	height: 20px;
+    width: 25px;
+	height: 25px;
 	box-shadow: rgba(245, 245, 245, 0.603);
 }
 
@@ -19,6 +20,19 @@ td {
     margin-right: 10px;
 }
 
+body {
+    margin: 0;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: white;
+    text-align: left;
+    background-color: #fff;
+}
+.colorCodes{
+	background-color: papayawhip;
+}
 ul {
 	list-style-type: none;
 }
@@ -34,12 +48,17 @@ ul {
 }
 table{
 	border: 2px solid #f4f4f4;
+	/* background-image: url("surfaceanimated.jpg"); */
+	background-image: url(marssurface.png);
+	background-repeat: no-repeat;
+	background-size: contain;
 	
 }
 .wall {
 	transition : background-color 0.1s ease-in-out;
 	background-color: hsl(0, 0%, 6%);
 	border-color: hsl(0, 0%, 6%);
+	opacity: 90%;
 }
 
 .none {
@@ -52,33 +71,43 @@ table{
 	transition : background-color 0.08s ease-in-out;
 	background-color: #65c5b5;
 	border-color: #1cd4b5;
+	opacity: 90%;
 }
 
 .visited {
 	transition : background-color 0.08s ease-in-out;
 	background-color: #e89440;
 	border-color: #e89440;
+	opacity: 90%;
 }
 
 .success {
 	transition : background-color 0.08s ease-in-out;
 	background-color: #ffee31;
 	border-color: #ffee31;
+	opacity: 85%;
 }
 
 .start {
-	background-color: #096911a1;
-	border-color: #09691b;
-}
+	transition : background-color 0.1s ease-in-out;
+	background-image: url(mars_rover.png);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+} 
 
 .end {
-	background-color: #e70b03b4;
-	border-color:#e70b0b;
+	transition : background-color 0.1s ease-in-out;
+	background-image: url(end.png);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
 }
 
 #bigTableContainer {
 	margin-top: 30px;
 	background-color: rgb(173, 35, 132);
+	
 }
 
 .custom-section {
