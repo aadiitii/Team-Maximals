@@ -12,7 +12,7 @@ var movingStart = false;
 var movingEnd = false;
 var length = 0;
 var bidirectional=true;   // implement a func to set this variable true when that option is clicked
-var type ="octile"; //create a func to set the type according to the selected option
+var type ="manhattan"; //create a func to set the type according to the selected option
 var weight = 1;  // update this value according to the weight entered by the user
 var diagonalMovement = "Always";
 var allowadiagonal = true;
@@ -269,7 +269,16 @@ function moveStartOrEnd( newIndex, startOrEnd){
     Board(keepWalls = true);
     return;
 }
-
+function makeWall(cell){
+	if (!createWalls){return;}
+    var index = $( "td" ).index( cell );
+    var row = Math.floor( ( index ) / totalRows) + 1;
+    var col = ( index % totalCols ) + 1;
+    console.log([row, col]);
+    if ((inProgress == false) && !(row == 1 && col == 1) && !(row == totalRows && col == totalCols)){
+    	$(cell).toggleClass("wall");
+    }
+}
 function updateSpeedDisplay(){
 	if (animationSpeed == "Slow"){
 		$(".speedDisplay").text("Speed: Slow");
@@ -409,7 +418,7 @@ async function traverseGraph(algorithm){
 
 function executeAlgo(){
 	if (algorithm == "Depth-First Search (DFS)"){
-		//var visited = createVisited();
+		var visited = actualVisited();
 		var pathFound = DFS(startCell[0], startCell[1], visited);
 	} else
 	if (algorithm == "Breadth-First Search (BFS)"){
@@ -439,7 +448,7 @@ function executeAlgo(){
 
 function actualVisited(){
 	var visited = [];
-    var cells = $("#tableContainer").find("td");
+    
    
 	for (var i = 0; i < totalRows; i++){
 		var row = [];
@@ -455,6 +464,22 @@ function actualVisited(){
 function cellIsAWall(i, j, cells){
 	var cellNum = (i * (totalCols)) + j;
 	return $(cells[cellNum]).hasClass("wall");
+}
+function iswall(){
+	var wall = [];
+	var cells = $("#tableContainer").find("td");
+	for (var i = 0; i < totalRows; i++){
+		var row = [];
+		for (var j = 0; j < totalCols; j++){
+			if (cellIsAWall(i, j, cells)){
+				row.push(true);
+			} else {
+				row.push(false);
+			}
+		}
+		wall.push(row);
+	}
+	return wall;
 }
 function createPrev(){
 	var prev = [];
@@ -607,6 +632,30 @@ function heuristics(type,i,j,pos){
 	 return ( Math.max(dx, dy));
   }
   
+}
+
+function DFS(i, j, visited){
+	
+	if (i == endCell[0] && j == endCell[1]){
+		cellsToAnimate.push( [[i, j], "success"] );
+		return true;
+	}
+	visited[i][j] = true;
+	cellsToAnimate.push( [[i, j], "searching"] );
+	var neighbors = getNeighbours(i, j,diagonalMovement);
+	for(var k = 0; k < neighbors.length; k++){
+		var m = neighbors[k][0];
+		var n = neighbors[k][1]; 
+		if ( visited[m][n] == null){
+			var pathFound = DFS(m, n, visited);
+			if ( pathFound ){
+				cellsToAnimate.push( [[i, j], "success"] );
+				return true;
+			} 
+		}
+	}
+	cellsToAnimate.push( [[i, j], "visited"] );
+	return false;
 }
 
 function BFS(){
@@ -1508,10 +1557,223 @@ function BigreedyBestFirstSearch(){
 	return pathFound;
 }
 
+function Heuristics(type,x1,y1,x2,y2){
+	
+		var dx = Math.abs(x2 - x1);
+	    var dy = Math.abs(y2 - y1);
+	
+	
+  if(type === "manhattan"){
+      return (dx + dy);
+  }
+  if(type === "euclidean"){
+      return (Math.sqrt(dx * dx + dy*dy));
+  }
+  if(type === "octile"){
+	var F = Math.SQRT2 - 1;
+	console.log("octile distance" + (dx < dy) ? F * dx + dy : F * dy + dx);
+	return (dx < dy) ? F * dx + dy : F * dy + dx;
+	
+  }
+  if(type === "chebyshev"){
+	 return ( Math.max(dx, dy));
+  }
+  
+}
 
 
+function jumpPointSearch() {
+	var pathFound = false;
+	var myHeap = new minHeap();
+	var prev = createPrev();
+	var distances = createDistances();
+	var costs = createDistances();
+	var visited = actualVisited();
+	var walls = iswall();
+	console.log(walls);
+	distances[ startCell[0] ][ startCell[1] ] = 0;
+	costs[ startCell[0] ][ startCell[1] ] = 0;
+	myHeap.push([0, [startCell[0], startCell[1]]]);
+	cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
+	while (!myHeap.isEmpty()){
+		var cell = myHeap.getMin();
+		var i = cell[1][0];
+		var j = cell[1][1];
+		if (visited[i][j] != null){ continue; }
+		visited[i][j] = true;
+		cellsToAnimate.push([[i, j], "visited"]);
+		if (i == endCell[0] && j == endCell[1]){
+			pathFound = true;
+			break;
+		}
+		var neighbors = pruneNeighbors(i, j, visited, walls);
+		console.log(neighbors);
+		for (var k = 0; k < neighbors.length; k++){
+			var m = neighbors[k][0];
+			var n = neighbors[k][1];
+			if (visited[m][n] != null){ continue; }
+			var newDistance = distances[i][j] + Heuristics( type,m,n,i,j );
+			if (newDistance < distances[m][n]){
+				distances[m][n] = newDistance;
+				prev[m][n] = [i, j];
+				cellsToAnimate.push( [[m, n], "searching"] );
+			}
+			var newCost = distances[i][j] + Heuristics( type,m,n,endCell[0],endCell[1] ); 
+			if (newCost < costs[m][n]){
+				costs[m][n] = newCost;
+				myHeap.push([newCost, [m, n]]);
+			}
+		}
+	}
+	// Make any nodes still in the heap "visited"
+	// while ( !myHeap.isEmpty() ){
+	// 	var cell = myHeap.getMin();
+	// 	var i = cell[1][0];
+	// 	var j = cell[1][1];
+	// 	if (visited[i][j]){ continue; }
+	// 	visited[i][j] = true;
+	// 	cellsToAnimate.push( [[i, j], "visited"] );
+	// }
+	// If a path was found, illuminate it:
+	if (pathFound) {
+		var i = endCell[0];
+		var j = endCell[1];
+		cellsToAnimate.push( [endCell, "success"] );
+		while (prev[i][j] != null){
+			var prevCell = prev[i][j];
+			x = prevCell[0];
+			y = prevCell[1];
+			// Loop through and illuminate each cell in between [i, j] and [x, y]
+			// Horizontal
+			if ((i - x) == 0){
+				// Move right
+				if (j < y){
+					for (var k = j; k < y; k++){
+						cellsToAnimate.push( [[i, k], "success"] );
+					}
+				// Move left
+				} else {
+					for (var k = j; k > y; k--){
+						cellsToAnimate.push( [[i, k], "success"] );
+					}
+				}
+			// Vertical
+			} else {
+				// Move down
+				if (i < x){
+					for (var k = i; k < x; k++){
+						cellsToAnimate.push( [[k, j], "success"] );
+					}
+				// Move up
+				} else {
+					for (var k = i; k > x; k--){
+						cellsToAnimate.push( [[k, j], "success"] );
+					}
+				}
+			}
+			i = prevCell[0];
+			j = prevCell[1];
+			cellsToAnimate.push( [[i, j], "success"] );
+		}
+	}
+	return pathFound;
+}
 
 
+function pruneNeighbors(i, j, visited, walls){
+	var neighbors = [];
+	var stored = {};
+	// Scan horizontally
+	for (var num = 0; num < 2; num++){
+		if (!num){
+			var direction = "right";
+			var increment = 1;
+		} else {
+			var direction = "left";
+			var increment = -1;
+		}
+		for (var c = j + increment; (c < totalCols) && (c >= 0); c += increment){
+			var xy = i + "-" + c;
+			if (visited[i][c]){	break; }
+			//Check if same row or column as end cell
+			if ((endCell[0] == i || endCell[1] == c) && !stored[xy]){
+				neighbors.push([i, c]);
+				stored[xy] = true;
+				continue;
+			}
+			// Check if dead end
+			var deadEnd = !(xy in stored) && ((direction == "left" && (c > 0) && walls[i][c - 1]) || (direction == "right" && c < (totalCols - 1) && walls[i][c + 1]) || (c == totalCols - 1) || (c == 0));  
+			if (deadEnd){
+				neighbors.push([i, c]);
+				stored[xy] = true;
+				break;
+			}
+			//Check for forced neighbors
+			var validForcedNeighbor = (direction == "right" && c < (totalCols - 1) && (!walls[i][c + 1])) || (direction == "left" && (c > 0) && (!walls[i][c - 1]));
+			if (validForcedNeighbor){
+				checkForcedNeighbor(i, c, direction, neighbors, walls, stored);
+			}
+		}
+	}
+	// Scan vertically
+	for (var num = 0; num < 2; num++){
+		if (!num){
+			var direction = "down";
+			var increment = 1;
+		} else {
+			var direction = "up";
+			var increment = -1;
+		}
+		for (var r = i + increment; (r < totalRows) && (r >= 0); r += increment){
+			var xy = r + "-" + j;
+			if (visited[r][j]){	break; }
+			if ((endCell[0] == r || endCell[1] == j) && !stored[xy]){
+				neighbors.push([r, j]);
+				stored[xy] = true;
+				continue;
+			}
+			// Check if dead end
+			var deadEnd = !(xy in stored) && ((direction == "up" && (r > 0) && walls[r - 1][j]) || (direction == "down" && r < (totalRows - 1) && walls[r + 1][j]) || (r == totalRows - 1) || (r == 0));  
+			if (deadEnd){
+				neighbors.push([r, j]);
+				stored[xy] = true;
+				break;
+			}
+			//Check for forced neighbors
+			var validForcedNeighbor = (direction == "down" && (r < (totalRows - 1)) && (!walls[r + 1][j])) || (direction == "up" && (r > 0) && (!walls[r - 1][j]));
+			if (validForcedNeighbor){
+				checkForcedNeighbor(r, j, direction, neighbors, walls, stored);
+			}
+		}
+	}
+	return neighbors;
+}
+
+function checkForcedNeighbor(i, j, direction, neighbors, walls, stored){
+	//console.log(JSON.stringify(walls));
+	if (direction == "right"){
+		var isForcedNeighbor = ((i > 0) && walls[i - 1][j] && (!walls[i - 1][j + 1])) || ((i < (totalRows - 1)) &&  walls[i + 1][j] && (!walls[i + 1][j + 1]));
+		var neighbor = [i, j + 1];
+	} else if (direction == "left"){
+		var isForcedNeighbor = ((i > 0) && walls[i - 1][j] && !walls[i - 1][j - 1]) || ((i < (totalRows - 1)) && walls[i + 1][j] && !walls[i + 1][j - 1]);
+		var neighbor = [i, j - 1];
+	} else if (direction == "up"){
+		var isForcedNeighbor = ((j < (totalCols - 1)) && walls[i][j + 1] && !walls[i - 1][j + 1]) || ((j > 0) && walls[i][j - 1] && !walls[i - 1][j - 1]);
+		var neighbor = [i - 1, j];
+	} else {
+		var isForcedNeighbor = ((j < (totalCols - 1)) && walls[i][j + 1] && !walls[i + 1][j + 1]) || ((j > 0) && walls[i][j - 1] && !walls[i + 1][j - 1]);
+		var neighbor = [i + 1, j];
+	}
+	var xy = neighbor[0] + "-" + neighbor[1];
+	if (isForcedNeighbor && !stored[xy]){
+		//console.log("Neighbor " + JSON.stringify(neighbor) + " is forced! Adding to neighbors and stored.")
+		neighbors.push(neighbor);
+		stored[xy] = true;
+	} else {
+		//console.log("Is not a forced neighbor..");
+	}
+	//return;
+}
 
 
 async function animateCells(){
