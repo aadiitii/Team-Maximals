@@ -5,7 +5,7 @@ var createWalls = false;
 var justFinished = false;
 var algorithm = null;
 var animationSpeed = "Fast";
-var startCell = [11, 15];
+var startCell = [11, 16];
 var endCell = [11, 25];
 var cellsToAnimate = [];
 var movingStart = false;
@@ -14,7 +14,7 @@ var length = 0;
 var bidirectional=true;   // implement a func to set this variable true when that option is clicked
 var type ="octile"; //create a func to set the type according to the selected option
 var weight = 1;  // update this value according to the weight entered by the user
-var diagonalMovement = "Never";
+var diagonalMovement = "Always";
 var allowadiagonal = true;
 
 function generateGrid( rows, cols ) {
@@ -480,23 +480,23 @@ function getNeighbours(i, j, diagonalMovement){
 	var d2 = null;
 	var d3 = null;
 
-	if ( i > 0 && (i < totalRows -1 )&& !cellIsAWall(i-1,j,cells) ){ 
+	if ( i > 0 && (i <= (totalRows -1) )&& !cellIsAWall(i-1,j,cells) ){ 
 		//neighbours.push( [i - 1, j] );
 		s0=true;
 	} //top
-	if ( j < (totalCols - 1) && j>0  && !cellIsAWall(i,j+1,cells)){
+	if ( j < (totalCols - 1) && j>=0  && !cellIsAWall(i,j+1,cells)){
 		 //neighbours.push( [i, j + 1] );
 		 s1 = true;
 		} //right
-	if (i>0 && i < (totalRows - 1)   && !cellIsAWall(i+1,j,cells)){
+	if (i>=0 && i < (totalRows - 1)   && !cellIsAWall(i+1,j,cells)){
 		 //neighbours.push( [i + 1, j] );
 		s2 = true;
 		} //bottom
-	if ( j > 0 && (j < totalCols-1)  && !cellIsAWall(i,j-1,cells) ){
+	if ( j > 0 && (j <= (totalCols-1))  && !cellIsAWall(i,j-1,cells) ){
 		 //neighbours.push( [i, j - 1] );
 		s3= true;
 		} //left
-
+	else{console.log("neighbour got out of bound s");}
 	
 	if (diagonalMovement === "OnlyWhenNoObstacles") {
 		d0 = s3 && s0;
@@ -525,7 +525,7 @@ function getNeighbours(i, j, diagonalMovement){
 	}
 
 	// ↖
-	if (d0 && !cellIsAWall(i - 1, j - 1, cells)) {
+	if (d0 && !cellIsAWall(i - 1, j - 1, cells)  && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
 		neighbours.push([i- 1,j - 1]);
 	}
 	if(s0){
@@ -533,27 +533,37 @@ function getNeighbours(i, j, diagonalMovement){
 	}
 
 	// ↗
-	if (d1 && !cellIsAWall(i - 1, j + 1, cells)) {
+	if (d1 && !cellIsAWall(i - 1, j + 1, cells ) && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
 		neighbours.push([i - 1, j + 1]);
 	}
+	else{console.log("neighbour got out of bound d1");}
 
 	if(s1){
 		neighbours.push( [i, j + 1] );
 	}
+	
 	// ↘
-	if (d2 && !cellIsAWall(i + 1, j + 1, cells)) {
+	if (d2 && !cellIsAWall(i + 1, j + 1, cells)  && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
 		neighbours.push([i + 1, j + 1]);
 	}
+	else{
+		console.log("neighbour got out of bound d2");
+	}
+	
 	if(s2){
 		neighbours.push( [i + 1, j] );
 	}
+
 	// ↙
-	if (d3 && !cellIsAWall(i + 1, j - 1, cells)) {
+	if (d3 && !cellIsAWall(i + 1, j - 1, cells)  && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
 		neighbours.push([i + 1, j - 1]);
 	}
+	else{console.log("neighbour got out of bound d");}
+	
 	if(s3){
 		neighbours.push( [i, j - 1] );
 	}
+
 	console.log(neighbours);
 	return neighbours;
 };
@@ -589,7 +599,9 @@ function heuristics(type,i,j,pos){
   }
   if(type === "octile"){
 	var F = Math.SQRT2 - 1;
+	console.log("octile distance" + (dx < dy) ? F * dx + dy : F * dy + dx);
 	return (dx < dy) ? F * dx + dy : F * dy + dx;
+	
   }
   if(type === "chebyshev"){
 	 return ( Math.max(dx, dy));
@@ -617,7 +629,7 @@ function BFS(){
 		}
 		// Put neighboring cells in queue
 		var neighbours = getNeighbours(r, c,diagonalMovement);
-		console.log(neighbours);
+		console.log("neighbours are" + neighbours + "of" + r + " " + c );
 		for (var k = 0; k < neighbours.length; k++){
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
@@ -791,17 +803,7 @@ function biBFS(){
 
 
 function AStar() {
-	if (!diagonalMovement) {
-		if (!allowDiagonal) {
-			diagonalMovement = "Never";
-		} else {
-			if (dontCrossCorners) {
-				diagonalMovement = "OnlyWhenNoObstacles";
-			} else {
-				diagonalMovement = "IfAtMostOneObstacle";
-			}
-		}
-	}
+
 	
 	var pathFound = false;
 	var myHeap = new minHeap();
@@ -945,6 +947,7 @@ function BiAStar() {
 				if (newDistance < startdistances[m][n]){
 					startdistances[m][n] = newDistance;
 					startprev[m][n] = [i, j];
+					console.log("startprev" + startprev[m][n]);
 					cellsToAnimate.push( [[m, n], "searching"] );
 				}
 				// manhattan dist used
@@ -1056,17 +1059,7 @@ function BiAStar() {
 
 
 function dijkstra() {
-	if (!diagonalMovement) {
-		if (!allowDiagonal) {
-			diagonalMovement = "Never";
-		} else {
-			if (dontCrossCorners) {
-				diagonalMovement = "OnlyWhenNoObstacles";
-			} else {
-				diagonalMovement = "IfAtMostOneObstacle";
-			}
-		}
-	}
+
 	var pathFound = false;
 	var myHeap = new minHeap();
 	var prev = createPrev();
@@ -1091,16 +1084,18 @@ function dijkstra() {
 		for (var k = 0; k < neighbours.length; k++){
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
-			if (visited[m][n] === null){
-			var newDistance = distances[i][j] + (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));
-			if (newDistance < distances[m][n]){
-				distances[m][n] = newDistance;
-				prev[m][n] = [i, j];
-				myHeap.push([newDistance, [m, n]]);
-				//console.log("New cell was added to the heap! It has distance = " + newDistance + ". Heap = " + JSON.stringify(myHeap.heap));
-				cellsToAnimate.push( [[m, n], "searching"] );
+			if (visited[m][n] == null || visited[m][n] == false || visited[m][n] == undefined){
+				var newDistance = distances[i][j] + (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));
+				if (newDistance < distances[m][n]){
+					distances[m][n] = newDistance;
+					prev[m][n] = [i, j];
+					myHeap.push([newDistance, [m, n]]);
+					//console.log("New cell was added to the heap! It has distance = " + newDistance + ". Heap = " + JSON.stringify(myHeap.heap));
+					cellsToAnimate.push( [[m, n], "searching"] );
+				}
 			}
-		}
+		else { 
+			continue; }
 	}
 	}
 	}
@@ -1127,32 +1122,39 @@ function dijkstra() {
 	return pathFound;
 }
 
-function Bidijkstra(){
+
+
+
+function Bidijkstra() {
 	
 	var pathFound = false;
     
     var startHeap = new minHeap();
 	var startprev = createPrev();
     var startdistances = createDistances();
-	
+	//var startcosts = createDistances();
 	var endHeap = new minHeap();
 	var endprev = createPrev();
     var enddistances = createDistances();
-
+	//var endcosts = createDistances();
     var visited = actualVisited();
     var intersecting_node = -1;
     // set the distances nd costs for start cell and end cell =0 and visited as s nd e respectively
 
     startdistances[ startCell[0] ][ startCell[1] ] = 0;
+    //startcosts[ startCell[0] ][ startCell[1] ] = 0;
     startHeap.push([0, [startCell[0], startCell[1]]]);
-    cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
+    // visited[startCell[0]][startCell[1]] = 's';
+	cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
    
     enddistances[ endCell[0] ][ endCell[1] ] = 0;
+	//endcosts[ endCell[0] ][ endCell[1] ] = 0;
 	endHeap.push([0, [endCell[0], endCell[1]]]);
-  	cellsToAnimate.push([[endCell[0], endCell[1]], "searching"]);
+    // visited[endCell[0]][endCell[1]] = 'e';
+	cellsToAnimate.push([[endCell[0], endCell[1]], "searching"]);
 
     while (!startHeap.isEmpty() && !endHeap.isEmpty()){
-        console.log("loop1");
+      //  console.log("loop1");
         // pop the position of start node which has the minimum cost 
 		var s_cell = startHeap.getMin();
 		console.log("s_cell is: " + s_cell);
@@ -1168,7 +1170,7 @@ function Bidijkstra(){
 			// }
 			var start_neighbours = getNeighbours(i, j, diagonalMovement);
 			for (var k = 0; k < start_neighbours.length; k++){
-				console.log("loop2");
+		//		console.log("loop2");
 	
 				var m = start_neighbours[k][0];
 				var n = start_neighbours[k][1];
@@ -1181,13 +1183,21 @@ function Bidijkstra(){
 					break;
 				}
 				// visited[m][n]='s';
-				var newDistance = startdistances[i][j] + (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));//check for root2 
+				var newDistance = startdistances[i][j]+  (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));
 				if (newDistance < startdistances[m][n]){
 					startdistances[m][n] = newDistance;
 					startprev[m][n] = [i, j];
-					startHeap.push([newDistance, [m, n]]);
+					console.log("startprev" + startprev[m][n]);
 					cellsToAnimate.push( [[m, n], "searching"] );
+					startHeap.push([newDistance, [m, n]] );
+
 				}
+				// manhattan dist used
+				// var newCost = startdistances[i][j] + (weight *heuristics(type,m,n,'s'));
+				// if (newCost < startcosts[m][n]){
+				// 	startcosts[m][n] = newCost;
+				// 	startHeap.push([newCost, [m, n]]);
+				// }
 			}	
 			
 		}
@@ -1200,6 +1210,7 @@ function Bidijkstra(){
 		if (visited[r][c] == null){ 
 			visited[r][c] = 'e';
 			cellsToAnimate.push([[r, c], "visited"]);
+			console.log("endprev" + endprev[r][c]);
 			if (r == startCell[0] && c == startCell[1]){
 				pathFound = true;
 				break;
@@ -1218,13 +1229,19 @@ function Bidijkstra(){
 					break;
 				}
 				// visited[m][n]='s';
-				var newDistance = enddistances[r][c] + (( m-r ===0 || n-c ===0) ? 1 :Math.sqrt(2));//check for root2 
+				var newDistance = enddistances[r][c] + (( m-r ===0 || n-c ===0) ? 1 :Math.sqrt(2));
 				if (newDistance < enddistances[m][n]){
 					enddistances[m][n] = newDistance;
 					endprev[m][n] = [r, c];
-					endHeap.push([newDistance, [m, n]]);
 					cellsToAnimate.push( [[m, n], "searching"] );
+					endHeap.push([newDistance, [m,n]] );
 				}
+				// manhattan dist used
+				// var newCost = enddistances[r][c] + (weight *heuristics(type,m,n,'e'));
+				// if (newCost < endcosts[m][n]){
+				// 	endcosts[m][n] = newCost;
+				// 	endHeap.push([newCost, [m, n]]);
+				//}
 		   }
 		
 			
@@ -1274,16 +1291,6 @@ function Bidijkstra(){
 	length = sum.toFixed(2);
 	break;
 	}
-    	
-		// Make any nodes still in the heap "visited"
-		// while ( !myHeap.isEmpty() ){
-		// 	var cell = myHeap.getMin();
-		// 	var i = cell[1][0];
-		// 	var j = cell[1][1];
-		// 	if (visited[i][j] !==null){ continue; }
-		// 	visited[i][j] = true;
-		// 	cellsToAnimate.push( [[i, j], "visited"] );
-		// }
 
   
     }
@@ -1293,6 +1300,7 @@ function Bidijkstra(){
     
 	return pathFound;
 }
+
 
 function greedyBestFirstSearch() {
 	var pathFound = false;
@@ -1549,7 +1557,7 @@ function getDelay(){
 		if (algorithm == "Depth-First Search (DFS)") {
 			delay = 10;
 		} else {
-			delay = 5;
+			delay = 1;
 		}
 	}
 	console.log("Delay = " + delay);
