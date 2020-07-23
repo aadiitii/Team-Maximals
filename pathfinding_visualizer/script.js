@@ -17,6 +17,8 @@ var weight = 1;  // update this value according to the weight entered by the use
 var diagonalMovement = "Always";
 var allowadiagonal = true;
 
+
+// To Generate Grid
 function generateGrid( rows, cols ) {
     var grid = "<table>";
     for ( row = 1; row <= rows; row++ ) {
@@ -196,6 +198,13 @@ $( "#clearBtn" ).click(function(){
 	Board(keepWalls = false);
 });
 
+$( "#mazesBtn ").click(function(){
+	if ( inProgress ){ update("wait"); return; }
+	maze = $(this).text();
+	randomMaze();
+	console.log("Maze has been changd to: " + maze);
+});
+
 /* --------------------- */
 /* --- NAV BAR MENUS --- */
 /* --------------------- */
@@ -222,12 +231,12 @@ $( "#diagonal .dropdown-item").click(function(){
 });
 
 
-$( "#type .dropdown-item").click(function(){
-	if ( inProgress ){ update("wait"); return; }
-	type = $(this).text();
-	Updateheuristics();
-	console.log("DiagonalMovement has been changd to: " + type);
-});
+// $( "#type .dropdown-item").click(function(){
+// 	if ( inProgress ){ update("wait"); return; }
+// 	type = $(this).text();
+// 	Updateheuristics();
+// 	console.log("DiagonalMovement has been changd to: " + type);
+// });
 
 
 
@@ -449,7 +458,6 @@ function executeAlgo(){
 function actualVisited(){
 	var visited = [];
     
-   
 	for (var i = 0; i < totalRows; i++){
 		var row = [];
 		for (var j = 0; j < totalCols; j++){  
@@ -460,6 +468,7 @@ function actualVisited(){
     
 	return visited;
 }
+
 
 function cellIsAWall(i, j, cells){
 	var cellNum = (i * (totalCols)) + j;
@@ -481,17 +490,7 @@ function iswall(){
 	}
 	return wall;
 }
-function createPrev(){
-	var prev = [];
-	for (var i = 0; i < totalRows; i++){
-		var row = [];
-		for (var j = 0; j < totalCols; j++){
-			row.push(null);
-		}
-		prev.push(row);
-	}
-	return prev;
-}
+
 
 function getNeighbours(i, j, diagonalMovement){
 	var neighbours = [];
@@ -549,13 +548,24 @@ function getNeighbours(i, j, diagonalMovement){
 		console.log("ERROR in  diagonal movement");
 	}
 
+	if(s0){
+		neighbours.push( [i - 1, j] );
+	}	
+	if(s1){
+		neighbours.push( [i, j + 1] );
+	}	
+
+	if(s2){
+		neighbours.push( [i + 1, j] );
+	}
+	if(s3){
+		neighbours.push( [i, j - 1] );
+	}
 	// ↖
 	if (d0 && !cellIsAWall(i - 1, j - 1, cells)  && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
 		neighbours.push([i- 1,j - 1]);
 	}
-	if(s0){
-		neighbours.push( [i - 1, j] );
-	}
+
 
 	// ↗
 	if (d1 && !cellIsAWall(i - 1, j + 1, cells ) && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
@@ -563,9 +573,7 @@ function getNeighbours(i, j, diagonalMovement){
 	}
 	else{console.log("neighbour got out of bound d1");}
 
-	if(s1){
-		neighbours.push( [i, j + 1] );
-	}
+
 	
 	// ↘
 	if (d2 && !cellIsAWall(i + 1, j + 1, cells)  && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
@@ -575,9 +583,7 @@ function getNeighbours(i, j, diagonalMovement){
 		console.log("neighbour got out of bound d2");
 	}
 	
-	if(s2){
-		neighbours.push( [i + 1, j] );
-	}
+
 
 	// ↙
 	if (d3 && !cellIsAWall(i + 1, j - 1, cells)  && i>0 && i < totalRows-1 && j>0 && j< totalCols-1) {
@@ -585,9 +591,6 @@ function getNeighbours(i, j, diagonalMovement){
 	}
 	else{console.log("neighbour got out of bound d");}
 	
-	if(s3){
-		neighbours.push( [i, j - 1] );
-	}
 
 	console.log(neighbours);
 	return neighbours;
@@ -661,9 +664,8 @@ function DFS(i, j, visited){
 function BFS(){
 	var pathFound = false;
 	var myQueue = new Array();
-	var prev = createPrev();
+	var prev = actualVisited();
 	var visited = actualVisited();
-	//var arrstorewall = storewalls();
 	myQueue.unshift( startCell );
 	cellsToAnimate.push(startCell, "searching");
 	visited[ startCell[0] ][ startCell[1] ] = true;
@@ -682,21 +684,16 @@ function BFS(){
 		for (var k = 0; k < neighbours.length; k++){
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
-			//if ( visited[m][n] ) { continue ;}
-			if ( visited[m][n]!==null) { continue ;}
-			visited[m][n] = true;
-			prev[m][n] = [r, c];
-			cellsToAnimate.push( [neighbours[k], "searching"] );
-			myQueue.unshift(neighbours[k]);
-		}
+			if ( visited[m][n] === null){
+			// if ( visited[m][n]!==null) { continue ;}
+				visited[m][n] = true;
+				prev[m][n] = [r, c];
+				cellsToAnimate.push( [neighbours[k], "searching"] );
+				myQueue.unshift(neighbours[k]);
+				}
 	}
-	// // Make any nodes still in the queue "visited"
-	// while ( myQueue.length > 0){
-	// 	var cell = myQueue.pop();
-	// 	var r = cell[0];
-	// 	var c = cell[1];
-	// 	cellsToAnimate.push( [cell, "visited"] );
-	// }
+	}
+
 	// If a path was found, illuminate it
 	if (pathFound) {
 		var sum=0;
@@ -723,8 +720,8 @@ function biBFS(){
     var s_queue = new Array();  // queue for search
     var t_queue = new Array();
  
-    var s_prev = createPrev(); //for parent
-    var t_prev = createPrev();
+    var s_prev = actualVisited(); //for parent
+    var t_prev = actualVisited();
  
     var visited = actualVisited(); // to keep track of visited nodes
    
@@ -856,7 +853,7 @@ function AStar() {
 	
 	var pathFound = false;
 	var myHeap = new minHeap();
-	var prev = createPrev();
+	var prev = actualVisited();
 	var distances = createDistances();
 	var costs = createDistances();
 	var visited = actualVisited();
@@ -939,11 +936,11 @@ function BiAStar() {
 	var pathFound = false;
     
     var startHeap = new minHeap();
-	var startprev = createPrev();
+	var startprev = actualVisited();
     var startdistances = createDistances();
 	var startcosts = createDistances();
 	var endHeap = new minHeap();
-	var endprev = createPrev();
+	var endprev = actualVisited();
     var enddistances = createDistances();
 	var endcosts = createDistances();
     var visited = actualVisited();
@@ -1111,7 +1108,7 @@ function dijkstra() {
 
 	var pathFound = false;
 	var myHeap = new minHeap();
-	var prev = createPrev();
+	var prev = actualVisited();
 	var distances = createDistances();
 	var visited = actualVisited();
 	distances[ startCell[0] ][ startCell[1] ] = 0;
@@ -1179,11 +1176,11 @@ function Bidijkstra() {
 	var pathFound = false;
     
     var startHeap = new minHeap();
-	var startprev = createPrev();
+	var startprev = actualVisited();
     var startdistances = createDistances();
 	//var startcosts = createDistances();
 	var endHeap = new minHeap();
-	var endprev = createPrev();
+	var endprev = actualVisited();
     var enddistances = createDistances();
 	//var endcosts = createDistances();
     var visited = actualVisited();
@@ -1354,7 +1351,7 @@ function Bidijkstra() {
 function greedyBestFirstSearch() {
 	var pathFound = false;
 	var myHeap = new minHeap();
-	var prev = createPrev();
+	var prev = actualVisited();
 	var costs = createDistances();
 	var visited = actualVisited();
 	costs[ startCell[0] ][ startCell[1] ] = 0;
@@ -1412,11 +1409,11 @@ function BigreedyBestFirstSearch(){
 	var pathFound = false;
     
     var startHeap = new minHeap();
-	var startprev = createPrev();
+	var startprev = actualVisited();
     var startcosts = createDistances();
 	
 	var endHeap = new minHeap();
-	var endprev = createPrev();
+	var endprev = actualVisited();
     var endcosts = createDistances();
 
     var visited = actualVisited();
@@ -1585,7 +1582,7 @@ function Heuristics(type,x1,y1,x2,y2){
 function jumpPointSearch() {
 	var pathFound = false;
 	var myHeap = new minHeap();
-	var prev = createPrev();
+	var prev = actualVisited();
 	var distances = createDistances();
 	var costs = createDistances();
 	var visited = actualVisited();
@@ -1775,6 +1772,72 @@ function checkForcedNeighbor(i, j, direction, neighbors, walls, stored){
 	//return;
 }
 
+
+
+
+// Random  Maze Generator
+
+async function randomMaze(){
+	inProgress = true;
+	Board(keepWalls = false);
+	var visited = actualVisited();
+	var walls = makeWalls();
+	var cells = [ startCell, endCell ];
+	walls [ startCell[0] ][ startCell[1] ] = false;
+	walls [ endCell[0] ][ endCell[1] ] = false;
+	visited[ startCell[0] ][ startCell[1] ] = true;
+	visited[ endCell[0] ][ endCell[1] ] = true;
+	while ( cells.length > 0 ){
+		var random = Math.floor(Math.random() * cells.length);
+		var randomCell = cells[random];
+		cells[random] = cells[cells.length - 1];
+		cells.pop();
+		var neighbors = getNeighbours(randomCell[0], randomCell[1]);
+		if (neighborsThatAreWalls(neighbors, walls) < 2){ continue; }
+		walls[ randomCell[0] ][ randomCell[1] ] = false;
+		for (var k = 0; k < neighbors.length; k++){
+			var i = neighbors[k][0];
+			var j = neighbors[k][1];
+			if (visited[i][j]){ continue; }
+			visited[i][j] = true;
+			cells.push([i, j]);
+		}
+	}
+	//Animate cells
+	var cells = $("#tableContainer").find("td");
+	for (var i = 0; i < totalRows; i++){
+		for (var j = 0; j < totalCols; j++){
+			if (i == 0 || i == (totalRows - 1) || j == 0 || j == (totalCols - 1) || walls[i][j]){ 
+				cellsToAnimate.push([ [i, j], "wall"]); 
+			}
+		}
+	}
+	await animateCells();
+	inProgress = false;
+	return;
+}
+
+function makeWalls(){
+	var walls = [];
+	for (var i = 0; i < totalRows; i++){
+		var row = [];
+		for (var j = 0; j < totalCols; j++){
+			row.push(true);
+		}
+		walls.push(row);
+	}
+	return walls;
+}
+
+function neighborsThatAreWalls( neighbors, walls ){
+	var neighboringWalls = 0;
+	for (var k = 0; k < neighbors.length; k++){
+		var i = neighbors[k][0];
+		var j = neighbors[k][1];
+		if (walls[i][j]) { neighboringWalls++; }
+	}
+	return neighboringWalls;
+}
 
 async function animateCells(){
 	animationState = null;

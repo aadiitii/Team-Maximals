@@ -30,8 +30,8 @@ body {
     text-align: left;
     background-color: #fff;
 }
-.colorCodes{
-	background-color: papayawhip;
+.btn-outline-maze{
+	background-color:"yellow";
 }
 ul {
 	list-style-type: none;
@@ -41,6 +41,8 @@ ul {
 	margin-right: 5px;
 	margin-left: 5px;
 }
+
+
 
 #update {
 	margin-bottom: 15px; 
@@ -54,12 +56,19 @@ table{
 	background-size: contain;
 	
 }
+
 .wall {
-	transition : background-color 0.1s ease-in-out;
-	background-color: hsl(0, 0%, 6%);
-	border-color: hsl(0, 0%, 6%);
-	opacity: 90%;
-}
+    transition: background-color 0.1s ease-in-out;
+    background-color: hsl(8deg 48% 17%);
+    border-color: #212529;
+    opacity: 80%;
+	/* transition : background-color 0.1s ease-in-out;
+	background-image: url("https://cdn5.vectorstock.com/i/1000x1000/56/19/flat-icon-design-collection-stealth-strike-vector-16405619.jpg");
+	background-position: center;
+	/* background-repeat: no-repeat; */
+	/* background-size: contain; */
+} 
+
 
 .none {
 	transition : background-color 0.1s ease-in-out;
