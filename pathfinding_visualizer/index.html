@@ -5,24 +5,27 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="magic.min.css">
 	<script src="https://kit.fontawesome.com/d1f3dd87b7.js" crossorigin="anonymous"></script>
-<!-- 	
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.css">
-    <link  rel="stylesheet" src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/themes/introjs-modern.css"> -->
-    <link href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.css" rel="stylesheet">
+ 	
+    <link href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.css" rel="stylesheet"> 
     <link href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/themes/introjs-modern.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="main.css">
 	
 </head>
-<body>
+<body> 
+	   <!-- navbar -->
 	<nav class="navbar navbar-expand-sm fixed-top navbar-dark bg-dark" id="myNavbar">
+		<!-- logo -->
   		<a class="navbar-brand" href="#" id="logo" >Path Finder</a>
 		  <button class="navbar-toggler" type="button" data-toggle="collapse" 
 		  data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     		<span class="navbar-toggler-icon"></span>
 		</button>
-
+	  
+	
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 	    	<ul class="navbar-nav mr-auto">
+					
+				<!-- algorithm dropdown -->
 		      	<li class="nav-item dropdown" id="algorithms">
 		        	<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		          	Algorithms
@@ -39,55 +42,68 @@
 					    <a class="dropdown-item" href="#">Depth-First Search (DFS)</a>
 					    <a class="dropdown-item" href="#">Jump Point Search</a>
 					</div>
-		      	</li>
-				  <li class="nav-item dropdown" id="diagonal">
-					<a class="nav-link dropdown-toggle diagonalDisplay" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Diagonal Movement
-				  </a>
-				  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-					  <a class="dropdown-item" href="#" >Never</a>
-					  <a class="dropdown-item" href="#">Always</a>
-					  <a class="dropdown-item" href="#">OnlyWhenNoObstacles</a>
-					  <a class="dropdown-item" href="#">IfAtMostOneObstacle</a>
-				  </div>
-			  </li>
-			  <li class="nav-item dropdown" id="type">
-				<a class="nav-link dropdown-toggle heuristicdisplay" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" data-toggle="tooltip" title="Only for A* and Greedy BFS" aria-haspopup="true" aria-expanded="false">
-				Heuristics
-			  </a>
-			  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-				  <a class="dropdown-item" href="#">manhattan</a>
-				  <a class="dropdown-item" href="#">octile</a>
-				  <a class="dropdown-item" href="#">euclidean</a>
-				  <a class="dropdown-item" href="#">chebyshev</a>
-			  </div>
-		  </li>
+				</li>
+					  
+				<!-- diagonal movement selection dropdown -->
+				<li class="nav-item dropdown" id="diagonal">
+					<a class="nav-link dropdown-toggle diagonalDisplay" href="#" id="navbarDropdown" 
+					   role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					   Diagonal Movement
+				    </a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" href="#" >Never</a>
+						<a class="dropdown-item" href="#">Always</a>
+						<a class="dropdown-item" href="#">OnlyWhenNoObstacles</a>
+						<a class="dropdown-item" href="#">IfAtMostOneObstacle</a>
+					</div>
+			    </li>
+				  
+				<!-- heuristic selection dropdown -->
+			  
+				<li class="nav-item dropdown" id="type">
+					<a class="nav-link dropdown-toggle heuristicdisplay" href="#" id="navbarDropdown" 
+					role="button" data-toggle="dropdown" data-toggle="tooltip" title="Only for A* and Greedy BFS" aria-haspopup="true" aria-expanded="false">
+					Heuristics
+					</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" href="#">manhattan</a>
+						<a class="dropdown-item" href="#">octile</a>
+						<a class="dropdown-item" href="#">euclidean</a>
+						<a class="dropdown-item" href="#">chebyshev</a>
+					</div>
+		        </li>
 
+					<!-- speed dropdown -->
 		      	<li class="nav-item dropdown" id="speed">
-					  <a class="nav-link dropdown-toggle speedDisplay" href="#" id="navbarDropdown" 
+					<a class="nav-link dropdown-toggle speedDisplay" href="#" id="navbarDropdown" 
 					  role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		          	Speed: Fast
+		              Speed: Fast
 		        	</a>
 					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
 					    <a class="dropdown-item" href="#">Slow</a>
 					    <a class="dropdown-item" href="#">Normal</a>
 					    <a class="dropdown-item" href="#">Fast</a>
 					</div>
-					<!-- <div> <button class="btn btn-outline-success btn-space" type="submit" id="mazesBtn">randomMaze</button></div> -->
 				</li>
-	    	</ul>
+			</ul>
+			
+			<!-- BUTTONS -->
+
+			<!-- generate random maze -->
 			<button type="button" class="btn btn-outline-maze btn-space" onclick="randomMaze()">Random Maze</button>
-            <button type="button" class="btn btn-outline-info btn-space" onclick="functionJs()">Start Tour</button>
 
- 		
+			<!-- site tour -->
+			<button type="button" class="btn btn-outline-info btn-space" onclick="functionJs()">Start Tour</button>
+			
+			<!-- Visualize algo   -->
+			<button class="btn btn-outline-success btn-space" type="submit" id="startBtn">Visualize</button>
 
-	      	<button class="btn btn-outline-success btn-space" type="submit" id="startBtn">Visualize</button>
+			<!-- clear board -->
 	      	<button type="button" class="btn btn-outline-warning btn-space" type="submit" id="clearBtn">Clear Board</button>
-	      	<!-- <button type="button" class="btn btn-outline-danger disabled" type="submit" id="stopBtn">Stop</button> -->
-		  
-		</div>
+	    </div>
  	</nav>
-
+	
+	 <!-- color codes -->
  	<div class="d-flex flex-row flex-wrap m-2 justify-content-around" id="colorCodes">	
  		<div class="d-flex p-2">
  			<div class="key wall"></div>  
@@ -113,15 +129,13 @@
  		
  	</div>
 
+	<!-- GRID/Play area -->
  	<div class="d-flex flex-column align-items-center" id="bigIntainer">
 		<div id="tableContainer"></div>
-		<!-- <div id="update">
-			Click or drag cells to build walls. 
-			<br/>Press the 'Start' button when you finish
-			 and have selected an algorithm.</div> ALREADY COMMENTED-->
- 	</div>
+	</div>
 	
-	 <div class ="d-flex flex-column" id="results">
+	<!-- results box -->
+	<div class ="d-flex flex-column" id="results">
 		<div class="d-flex justify-content-center"> 
 			<i id="resultsIcon" class="fas fa-exclamation"></i>
 		</div>
