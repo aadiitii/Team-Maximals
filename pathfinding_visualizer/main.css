@@ -107,7 +107,7 @@ table{
 
 .end {
 	transition : background-color 0.1s ease-in-out;
-	background-image: url(end.png);
+	background-image: url(Flag.png);
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: contain;
