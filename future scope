@@ -1,4 +1,4 @@
-/* to add multiple destination points, TSP can be used.This would give the order in which the algo should be called at each end point therby giving the path
+/* to find path for multiple destination points, TSP can be used.This would give the order in which the algo should be called at each end point therby giving the path
 from start to all the end points.this function however has to be optimised to avoid obstacles. */
 
 var endPoints = [endCell,point1, point2, point3, point4];
