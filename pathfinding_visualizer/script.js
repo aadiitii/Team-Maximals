@@ -1663,15 +1663,7 @@ function jumpPointSearch() {
 			}
 		}
 	}
-	// Make any nodes still in the heap "visited"
-	while ( !myHeap.isEmpty() ){
-		var cell = myHeap.getMin();
-		var i = cell[1][0];
-		var j = cell[1][1];
-		if (visited[i][j]){ continue; }
-		visited[i][j] = true;
-		cellsToAnimate.push( [[i, j], "visited"] );
-	}
+
 	// If a path was found, illuminate it:
 	if (pathFound) {
 		var i = endCell[0];
