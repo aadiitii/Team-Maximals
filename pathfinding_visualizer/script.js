@@ -625,35 +625,28 @@ function createDistances(){
 }
 
 //To get heuristic value
-function heuristics(type,i,j,pos){
-	//for target cell
-	if(pos== 'e'){
-		var dx = Math.abs(startCell[0] - i);
-	    var dy = Math.abs(startCell[1] - j);
-	}
-	// for start cell
-	else if(pos == 's'){
-		var dx = Math.abs(endCell[0] - i);
-		var dy = Math.abs(endCell[1] - j);
-	}
+
+function Heuristics(type,x1,y1,x2,y2){
 	
-	// formulas  to calculate heuristics
-  if(type === "manhattan"){
-      return (dx + dy);
-  }
-  if(type === "euclidean"){
-      return (Math.sqrt(dx * dx + dy*dy));
-  }
-  if(type === "octile"){
+	var dx = Math.abs(x2 - x1);
+	var dy = Math.abs(y2 - y1);
+
+
+if(type === "manhattan"){
+  return (dx + dy);
+}
+if(type === "euclidean"){
+  return (Math.sqrt(dx * dx + dy*dy));
+}
+if(type === "octile"){
+
 	var F = Math.SQRT2 - 1;
-	
-	return (dx < dy) ? F * dx + dy : F * dy + dx;
-	
-  }
-  if(type === "chebyshev"){
-	 return ( Math.max(dx, dy));
-  }
-  
+  return (dx < dy) ? F * dx + dy : F * dy + dx;
+}
+if(type === "chebyshev"){
+ return ( Math.max(dx, dy));
+}
+
 }
 
 
@@ -897,7 +890,7 @@ function AStar() {
 						cellsToAnimate.push( [[m, n], "searching"] );
 					}
 				  
-					var newCost = distances[i][j] + (weight *heuristics(type,m,n,'s'));
+					var newCost = distances[i][j] + (weight *Heuristics(type,m,n,endCell[0],endCell[1]));
 					if (newCost < costs[m][n]){
 				
 						
@@ -995,7 +988,7 @@ function BiAStar() {
 					cellsToAnimate.push( [[m, n], "searching"] );
 				}
 				
-				var newCost = startdistances[i][j] + (weight *heuristics(type,m,n,'s'));
+				var newCost = startdistances[i][j] + (weight *Heuristics(type,m,n,endCell[0],endCell[1]));
 				if (newCost < startcosts[m][n]){
 					startcosts[m][n] = newCost;
 					startHeap.push([newCost, [m, n]]);
@@ -1038,7 +1031,7 @@ function BiAStar() {
 					cellsToAnimate.push( [[m, n], "searching"] );
 				}
 				
-				var newCost = enddistances[r][c] + (weight *heuristics(type,m,n,'e'));
+				var newCost = enddistances[r][c] + (weight *Heuristics(type,m,n,startCell[0],startCell[1]));
 				if (newCost < endcosts[m][n]){
 					endcosts[m][n] = newCost;
 					endHeap.push([newCost, [m, n]]);
@@ -1376,7 +1369,7 @@ function greedyBestFirstSearch() {
 			if (visited[m][n]){ continue; }
 			
 			// calculate the new cost of current neighbour according to heuristics and update the cost and push in heap accordingly
-			var newCost = ( weight *heuristics(type,m,n,'s'));
+			var newCost = ( weight *Heuristics(type,m,n,endCell[0],endCell[1]));
 			
 			if (newCost < costs[m][n]){
 				prev[m][n] = [i, j];
@@ -1464,7 +1457,7 @@ function BigreedyBestFirstSearch(){
 					break;
 				}
 				// update the neighbour node's cost with new values according to heuristics and push in start heap
-				var newCost = (weight *heuristics(type,m,n,'s'));
+				var newCost = (weight *Heuristics(type,m,n,endCell[0],endCell[1]));
 				if (newCost < startcosts[m][n]){
 					startcosts[m][n] = newCost;
 					startprev[m][n] = [i, j];
@@ -1503,7 +1496,7 @@ function BigreedyBestFirstSearch(){
 				}
 			
 				// update the neighbour node,s cost with new values according to heuristics and push in end heap
-				var newCost = (weight *heuristics(type,m,n,'e'));
+				var newCost = (weight *Heuristics(type,m,n,startCell[0],startCell[1]));
 				if (newCost < endcosts[m][n]){
 					endcosts[m][n] = newCost;
 					endprev[m][n] = [r, c];
@@ -1598,28 +1591,7 @@ function DFS(i, j, visited){
 }
 
 
-function Heuristics(type,x1,y1,x2,y2){
-	
-	var dx = Math.abs(x2 - x1);
-	var dy = Math.abs(y2 - y1);
 
-
-if(type === "manhattan"){
-  return (dx + dy);
-}
-if(type === "euclidean"){
-  return (Math.sqrt(dx * dx + dy*dy));
-}
-if(type === "octile"){
-
-	var F = Math.SQRT2 - 1;
-  return (dx < dy) ? F * dx + dy : F * dy + dx;
-}
-if(type === "chebyshev"){
- return ( Math.max(dx, dy));
-}
-
-}
 
 //function to implement JPS
 function jumpPointSearch() {
