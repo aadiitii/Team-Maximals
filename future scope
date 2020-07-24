@@ -11,27 +11,6 @@ var recordDistance = Infinity;
 var bestEver= [];
 
 
-// function draw() {
-
-//   endPoints= [endCell,point1, point2, point3, point4];
-
-//   createOrderandPopulation();
-  
-//   calculateFitness();
-//   normalizeFitness();
-//   nextGeneration();
-
-//   var CELLS = [];
-//   console.log(bestEver);
- 
-//   for (var i = 1; i <= bestEver.length; i++) {
-//     var n = bestEver[i-1];
-//     CELLS[i]= endPoints[n];
-//   }
-//   CELLS[0]=startCell;
-//  display(CELLS);
-//   return true;
-// }
 function draw() {
 
       endPoints= [endCell,point1, point2, point3, point4];
@@ -59,7 +38,7 @@ function draw() {
       }
     //   bestEver=[];
       //console.log(population.length);
-    //   dijkstra(startCell,CELLS[0],null);
+      dijkstra(startCell,CELLS[0],null);
     
     //  display(CELLS);
      //travellingCalled = false; 
