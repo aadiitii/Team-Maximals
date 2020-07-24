@@ -58,9 +58,9 @@ table{
 
 .wall {
     transition: background-color 0.1s ease-in-out;
-    background-color: #5D6E7E;
-    border-color: #212529;
-    opacity: 80%;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    opacity: 95%;
 } 
 
 
