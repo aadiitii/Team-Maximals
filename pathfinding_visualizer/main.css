@@ -1,10 +1,4 @@
-body { 
-    padding-top: 80px; 
-	height: 100%;
-	/* background-color:navy; */
 
-		background-image: url("https://sm.mashable.com/t/mashable_in/photo/default/nasa-galaxy_9pu4.960.jpg");
-}
 td {
     border: 1px solid #fcf8f8;
     width: 26px;
@@ -13,10 +7,10 @@ td {
 }
 
 .key {
-	border: 1px solid rgb(107, 106, 106);
-	background-color: rgb(102, 101, 101);
-	width: 20px;
-    height: 20px;
+	/* border: 1px solid rgb(107, 106, 106);
+	background-color: rgb(102, 101, 101); */
+	width: 25px;
+    height: 25px;
 	margin-right: 10px;
 	border-radius: 50px;
 	
@@ -30,7 +24,12 @@ body {
     line-height: 1.5;
     color: white;
     text-align: left;
-    background-color: #fff;
+	background-color:black;
+	padding-top: 80px; 
+	height: 100%;
+	background-image: url(images/bodybg.jpg);
+	background-repeat: no-repeat;
+	background-size: cover;
 }
 
 ul {

@@ -13,7 +13,7 @@ var movingEnd = false;
 var length = 0;
 var bidirectional=true;   // implement a func to set this variable true when that option is clicked
 var type ="manhattan"; //create a func to set the type according to the selected option
-var weight = $("#weight").text(); // update this value according to the weight entered by the user
+var weight=1; // update this value according to the weight entered by the user
 var diagonalMovement = "Always";
 var allowadiagonal = true;
 
@@ -114,7 +114,7 @@ function minHeap() {
 // MOUSE FUNCTIONS
 
 $( "td" ).mousedown(function(){
-    // console.log("mouse down");
+   
 	var index = $( "td" ).index( this ); // to get index of cell
 	var startCellIndex = (startCell[0] * (totalCols)) + startCell[1];
 	var endCellIndex = (endCell[0] * (totalCols)) + endCell[1];
@@ -131,14 +131,14 @@ $( "td" ).mousedown(function(){
 			movingEnd = true;
 			console.log("Now moving end!");
 		} else {
-            // console.log("create wall!");
+            
 			createWalls = true;
 		}
 	 }
 });
 
 $( "td" ).mouseup(function(){
-    // console.log("mouse  up");
+   
 	createWalls = false;
 	movingStart = false;
 	movingEnd = false;
@@ -146,7 +146,7 @@ $( "td" ).mouseup(function(){
 
 $( "td" ).mouseenter(function() {
      
-    // console.log("mouse enter");
+    
 	if (!createWalls && !movingStart && !movingEnd){ return; }
     var index = $( "td" ).index( this );
     var startCellIndex = (startCell[0] * (totalCols)) + startCell[1];
@@ -169,7 +169,7 @@ $( "td" ).mouseenter(function() {
 });
 
 $( "td" ).click(function() {
-    // console.log("click");
+   
     var index = $( "td" ).index( this );
     var startCellIndex = (startCell[0] * (totalCols)) + startCell[1];
 	var endCellIndex = (endCell[0] * (totalCols)) + endCell[1];
@@ -387,13 +387,10 @@ function update(message){
 
 // Used to display results
 function updateResults(duration, pathFound, length){
-	// var firstAnimation = "swashOut";
-	// var secondAnimation = "swashIn";
-	// $("#results").removeClass();
-    // $("#results").addClass("magictime " + firstAnimation); 
+	
     setTimeout(function(){ 
     	$("#resultsIcon").removeClass();
-    	//$("#results").css("height","80px");
+    	
     	if (pathFound){
     		$('#results').css("background-color", "#77dd77");
     		$("#resultsIcon").addClass("fas fa-check");
@@ -403,8 +400,7 @@ function updateResults(duration, pathFound, length){
     	}
     	$("#duration").text("Duration: " + duration + " ms");
     	$("#length").text("Length: " + length);
-    	// $('#results').removeClass(firstAnimation);
-    	// $('#results').addClass(secondAnimation); 
+    	
     }, 1100);
 }
 
@@ -423,8 +419,14 @@ async function traverseGraph(algorithm){
 	var endTime = Date.now();
 	await animateCells();
 	if ( pathFound ){ 
+		if(algorithm==="Jump Point Search"){
+				updateResults((endTime - startTime), true, countLengthJPS());
+			}
+		else{
 		updateResults((endTime - startTime), true, countLength());
-	} else {
+		}
+	}
+	 else {
 		updateResults((endTime - startTime), false, countLength());
 	}
 	inProgress = false;
@@ -606,7 +608,6 @@ function getNeighbours(i, j, diagonalMovement){
 		neighbours.push([i + 1, j - 1]);
 	}
 
-	console.log("neighbours are " +neighbours);
 	return neighbours;
 };
 
@@ -645,7 +646,7 @@ function heuristics(type,i,j,pos){
   }
   if(type === "octile"){
 	var F = Math.SQRT2 - 1;
-	console.log("octile distance" + (dx < dy) ? F * dx + dy : F * dy + dx);
+	
 	return (dx < dy) ? F * dx + dy : F * dy + dx;
 	
   }
@@ -680,7 +681,7 @@ function BFS(){
 		}
 		// Put neighboring cells in queue
 		var neighbours = getNeighbours(r, c,diagonalMovement);
-		console.log("neighbours are" + neighbours + "of" + r + " " + c );
+	
 		for (var k = 0; k < neighbours.length; k++){
 			var m = neighbours[k][0];
 			var n = neighbours[k][1];
@@ -863,6 +864,7 @@ function AStar() {
 	
 	while (!myHeap.isEmpty()){
 		var cell = myHeap.getMin(); //pops the node with minimum cost
+		
 		var i = cell[1][0];
 		var j = cell[1][1];
 
@@ -886,18 +888,22 @@ function AStar() {
 				//otherwise diagonal and sqrt of 2
 				if (visited[m][n]===null){
 					var newDistance = distances[i][j] + (( m-i ===0 || n-j ===0) ? 1 :Math.sqrt(2));
-					console.log("distance" + newDistance);
+					
 					//update the distance and cost of the neighbours
 					if (newDistance < distances[m][n]){
 						distances[m][n] = newDistance;
 						prev[m][n] = [i, j];
+						
 						cellsToAnimate.push( [[m, n], "searching"] );
 					}
-				
+				  
 					var newCost = distances[i][j] + (weight *heuristics(type,m,n,'s'));
 					if (newCost < costs[m][n]){
+				
+						
 						costs[m][n] = newCost;
 						myHeap.push([newCost, [m, n]]);
+					
 					}
 				}
 		}
@@ -926,7 +932,7 @@ function AStar() {
 	return pathFound;
 }
 
-//Function to implement Bidirectional ASTAR
+// Function to implement Bidirectional ASTAR
 function BiAStar() {
 	var pathFound = false;
     
@@ -955,10 +961,10 @@ function BiAStar() {
 	cellsToAnimate.push([[endCell[0], endCell[1]], "searching"]);
 
     while (!startHeap.isEmpty() && !endHeap.isEmpty()){
-        console.log("loop1");
+        
         // pop the position of start node which has the minimum cost 
 		var s_cell = startHeap.getMin();
-		console.log("s_cell is: " + s_cell);
+		
 		var i = s_cell[1][0];
 		var j = s_cell[1][1];
 		if (visited[i][j] == null){ 
@@ -1071,7 +1077,7 @@ function BiAStar() {
 	 
 	   while (endprev[r][c] != null){
 		 a = r, b = c;
-		 console.log("t_prev console" + endprev[r][c]);
+		
 		 var prevCell = endprev[r][c];
 		 r = prevCell[0];
 		 c = prevCell[1];
@@ -1089,7 +1095,7 @@ function BiAStar() {
 	return pathFound;
 }
 
-// function to implement DIJKSTRA
+
 function dijkstra() {
 
 	var pathFound = false;
@@ -1168,8 +1174,6 @@ function dijkstra() {
 	}
 	return pathFound;
 }
-
-
 
 // function to implement Bidirectional DIJKSTRA
 function Bidijkstra() {
@@ -1559,8 +1563,6 @@ function BigreedyBestFirstSearch(){
 	return pathFound;
 }
 
-
-
 //Function to implement DEPTH FIRST SEARCH (Recursive)
 function DFS(i, j, visited){
 	
@@ -1609,10 +1611,9 @@ if(type === "euclidean"){
   return (Math.sqrt(dx * dx + dy*dy));
 }
 if(type === "octile"){
-var F = Math.SQRT2 - 1;
-console.log("octile distance" + (dx < dy) ? F * dx + dy : F * dy + dx);
-return (dx < dy) ? F * dx + dy : F * dy + dx;
 
+	var F = Math.SQRT2 - 1;
+  return (dx < dy) ? F * dx + dy : F * dy + dx;
 }
 if(type === "chebyshev"){
  return ( Math.max(dx, dy));
@@ -1620,8 +1621,7 @@ if(type === "chebyshev"){
 
 }
 
-
-
+//function to implement JPS
 function jumpPointSearch() {
 	var pathFound = false;
 	var myHeap = new minHeap();
@@ -1676,8 +1676,10 @@ function jumpPointSearch() {
 	if (pathFound) {
 		var i = endCell[0];
 		var j = endCell[1];
+		
 		cellsToAnimate.push( [endCell, "success"] );
 		while (prev[i][j] != null){
+
 			var prevCell = prev[i][j];
 			x = prevCell[0];
 			y = prevCell[1];
@@ -1714,7 +1716,19 @@ function jumpPointSearch() {
 			cellsToAnimate.push( [[i, j], "success"] );
 		}
 	}
+
 	return pathFound;
+}
+
+function countLengthJPS(){
+	var cells = $("td");
+	var length = 0;
+	for (var i = 0; i < cells.length; i++){
+		if ($(cells[i]).hasClass("success")){
+			length++;
+		}
+	}
+	return length+1; //length +1 to get end point 
 }
 
 function pruneNeighbors(i, j, visited, walls){
