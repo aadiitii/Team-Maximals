@@ -135,10 +135,6 @@ table{
 	margin-bottom: 20px;
 }
 
-#modalTitleContainer {
-	padding-top: 10px;
-}
-
 #results {
 	height: 87px;
 	width: 120px;
@@ -162,9 +158,6 @@ table{
 	padding: 3px;
 }
 
-/* #infoModalBtn {
-	margin-left: 20px;
-} */
 
 .fun-fact {
 	color: darkgreen;
